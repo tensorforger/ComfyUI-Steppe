@@ -1,2 +1,4 @@
 tests/
 scripts/
+node.zip
+.ruff_cache/

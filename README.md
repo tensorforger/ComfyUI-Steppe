@@ -8,8 +8,8 @@ base model, no hires fix, no prompt.
 - **2x frame rate** of videos (latent frame interpolation), also combined with 2x resolution.
 - **One step**: about 45 ms for a 1024 px image with the default model. Most of the time goes to the VAE decode.
 - **Sharpness control** through the high frequency feature (hff).
-- Works with latents of the **Wan 2.1 VAE**, which is used by Wan 2.1, Wan 2.2 14B, Qwen-Image and Qwen-Image-Edit,
-  among others.
+- Works with latents of the **Wan 2.1 VAE**, which is used by Wan 2.1, Wan 2.2 14B, Qwen-Image, Qwen-Image-Edit and
+  Krea 2, among others. Both `wan_2.1_vae` and `qwen_image_vae` decode the upscaled latents.
 
 <!-- TODO (stage 4): hero comparison card, video comparison GIF, workflow screenshot -->
 
@@ -35,7 +35,7 @@ yourself from [Hugging Face](https://huggingface.co/TensorForger/Steppe-Wan2.1) 
 | file | steps | size | use |
 |---|---|---|---|
 | `steppe_wan_2_1_200M_1step.safetensors` | 1 | 445 MB | **default**: the quality of the base model in one step |
-| `steppe_wan_2_1_200M_base.safetensors` | 1-200 (20) | 444 MB | most control: steps, CFG on hff, chained upscales |
+| `steppe_wan_2_1_200M_base.safetensors` | 1-200 (20) | 444 MB | most control and research: steps, CFG on hff; same quality as 1-step |
 | `steppe_wan_2_1_20M_1step.safetensors` | 1 | 39 MB | lite: very large outputs (2048 → 4096), real time |
 
 ## Nodes
@@ -49,14 +49,24 @@ yourself from [Hugging Face](https://huggingface.co/TensorForger/Steppe-Wan2.1) 
 
 Basic graph: `KSampler → Steppe Upscale Latent → VAE Decode`. Images and videos use the same node.
 
+## Example workflows
+
+In `example_workflows/` (also listed in ComfyUI's template browser under custom nodes):
+
+- `krea_2_steppe_image_upscale_4x.json`: Krea 2 Turbo at 960x1280, two chained Steppe nodes, 3840x5120 output.
+- `wan_2.1_steppe_video_upscale_spatiotemporal.json`: Wan 2.1 T2V 1.3B at 640x512, 65 frames at 16 fps, Steppe 2x
+  resolution and 2x frame rate: 1280x1024, 129 frames at 32 fps.
+
+The model links and folders are in the note inside each workflow.
+
 ### Parameters
 
 - **hff** (high frequency feature, `0...1`, default 0.9) is the target amount of fine detail and sharpness. `-1`
   turns hff off and lets the model choose. The values are absolute: Steppe Measure HFF on a photo at the target
   resolution gives a value that matches it.
 - **guidance**:
-  - 1-step models: distilled guidance, trained on 1-3 (default 2). `1` turns it off. It is a model input, so it
-    costs nothing.
+  - 1-step models: distilled guidance, trained on 1-3. The default `1` turns it off and is safe and stable; `2` also
+    works well. It is a model input, so it costs nothing.
   - Base model: classifier free guidance between `hff` and `negative_hff` (default: no hff). The effect is subtle,
     so use 4-8 for a visible change. Guidance above 1 costs two passes per step.
 - **temporal**: T latent frames become 1 + 2 (T - 1), i.e. 81 → 161 pixel frames for Wan. The first frame is kept.
@@ -65,8 +75,11 @@ Basic graph: `KSampler → Steppe Upscale Latent → VAE Decode`. Images and vid
 
 ### Tips
 
-- **Chained upscaling** 512 → 1024 → 2048: use two Steppe nodes. The base model with hff gives the most control
-  over the second step. The 20M model is fast enough for the 2048 → 4096 step.
+- **Chained upscaling** 512 → 1024 → 2048 (4x): use two Steppe nodes. The 1-step model is as good as the base model
+  here, too. The 20M model is fast enough for the 2048 → 4096 step.
+- **Any aspect ratio** works; inputs from 512x512 pixels up are tested.
+- **Base model**: same quality as the 1-step model for general use; it is for control and research (steps, CFG on
+  hff, negative hff, shift, noise scale).
 - **Decoding large outputs**: use `VAE Decode (Tiled)` for 2048 px images and upscaled videos.
 - **Video**: 81 frames at 480x832 → 960x1664 at 2x frame rate takes 3.5 s and 9 GB peak VRAM with the 1-step model
   (RTX 5090), plus the VAE decode.
@@ -103,7 +116,7 @@ from steppe import UpscaleSettings, load_upscaler
 upscaler = load_upscaler("steppe_wan_2_1_200M_1step.safetensors")  # downloads from Hugging Face
 upscaler.model.to("cuda")
 # raw (unnormalized) Wan 2.1 VAE latents, [B, 16, T, H, W] or [B, 16, H, W]
-upscaled = upscaler.upscale(latents, UpscaleSettings(spatial=True, temporal=False, hff=0.9, guidance=2.0))
+upscaled = upscaler.upscale(latents, UpscaleSettings(spatial=True, temporal=False, hff=0.9, guidance=1.0))
 ```
 
 ## Related

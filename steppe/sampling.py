@@ -34,7 +34,7 @@ class UpscaleSettings:
     spatial: bool = True
     temporal: bool = False
     hff: float | None = 0.9
-    guidance: float = 2.0
+    guidance: float = 1.0
     negative_hff: float | None = None
     steps: int = 20
     shift: float = 4.0

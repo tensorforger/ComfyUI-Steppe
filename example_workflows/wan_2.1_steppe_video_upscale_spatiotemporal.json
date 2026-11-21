@@ -1,0 +1,985 @@
+{
+  "id": "21720dda-bf84-4f0a-8469-a681c80e302e",
+  "revision": 0,
+  "last_node_id": 63,
+  "last_link_id": 122,
+  "nodes": [
+    {
+      "id": 38,
+      "type": "CLIPLoader",
+      "pos": [
+        -120,
+        170
+      ],
+      "size": [
+        390,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            74,
+            75
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+        "wan",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+        "type": "wan",
+        "device": "default"
+      }
+    },
+    {
+      "id": 39,
+      "type": "VAELoader",
+      "pos": [
+        -120,
+        320
+      ],
+      "size": [
+        390,
+        60
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            76,
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "wan_2.1_vae.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "wan_2.1_vae.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "wan_2.1_vae.safetensors"
+      }
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        310,
+        250
+      ],
+      "size": [
+        425.27801513671875,
+        180.6060791015625
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 75
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            52
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Negative Prompt)",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Overly vivid tones, overexposed, static, blurry details, subtitles, stylized, artwork, painting, image, motionless, overall grayish cast, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, frozen scene, cluttered background, three legs, crowded background, walking backwards"
+      ],
+      "widgets_values_named": {
+        "text": "Overly vivid tones, overexposed, static, blurry details, subtitles, stylized, artwork, painting, image, motionless, overall grayish cast, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, frozen scene, cluttered background, three legs, crowded background, walking backwards"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        310,
+        40
+      ],
+      "size": [
+        422.84503173828125,
+        164.31304931640625
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 74
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            46
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Positive Prompt)",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A cinematic macro shot in stunning 4K HDR, filmed at eye level with the camera aligned on the same axis as the cat and the cactus flower, so the cat's face and the bloom sit in a single straight line across the frame. The camera stays perfectly static throughout. During golden hour, warm amber sunlight falls directly on the cat's face, illuminating its eyes and fur as it slowly and deliberately leans in to examine the blooming cactus, whiskers twitching with curiosity. Shallow depth of field keeps the cat's sunlit face and the flower in razor-sharp focus against a softly blurred background. Midway through the shot, the cat blinks once, slowly and naturally, before continuing its inspection, while soft shadows and rich golden light wrap around the intimate scene."
+      ],
+      "widgets_values_named": {
+        "text": "A cinematic macro shot in stunning 4K HDR, filmed at eye level with the camera aligned on the same axis as the cat and the cactus flower, so the cat's face and the bloom sit in a single straight line across the frame. The camera stays perfectly static throughout. During golden hour, warm amber sunlight falls directly on the cat's face, illuminating its eyes and fur as it slowly and deliberately leans in to examine the blooming cactus, whiskers twitching with curiosity. Shallow depth of field keeps the cat's sunlit face and the flower in razor-sharp focus against a softly blurred background. Midway through the shot, the cat blinks once, slowly and naturally, before continuing its inspection, while soft shadows and rich golden light wrap around the intimate scene."
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 37,
+      "type": "UNETLoader",
+      "pos": [
+        -120,
+        40
+      ],
+      "size": [
+        390,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            94
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "wan2.1_t2v_1.3B_fp16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors?download=true",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "wan2.1_t2v_1.3B_fp16.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "wan2.1_t2v_1.3B_fp16.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 40,
+      "type": "EmptyHunyuanLatentVideo",
+      "pos": [
+        318.42805074644343,
+        478.36709742762054
+      ],
+      "size": [
+        315,
+        130
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            91
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyHunyuanLatentVideo"
+      },
+      "widgets_values": [
+        640,
+        512,
+        65,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 640,
+        "height": 512,
+        "length": 65,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        1604.768662062837,
+        43.96749818479392
+      ],
+      "size": [
+        390.32391779820773,
+        46
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 122
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 76
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            96
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 49,
+      "type": "CreateVideo",
+      "pos": [
+        1613.5794321889089,
+        135.65683814163557
+      ],
+      "size": [
+        380.0679816086508,
+        150
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 96
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            97
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        32,
+        "auto",
+        "sRGB",
+        "none"
+      ],
+      "widgets_values_named": {
+        "fps": 32,
+        "bit_depth": "auto",
+        "color_space": "sRGB",
+        "codec": "none"
+      }
+    },
+    {
+      "id": 3,
+      "type": "KSampler",
+      "pos": [
+        770,
+        160
+      ],
+      "size": [
+        315,
+        262
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 95
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 46
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 52
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 91
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            103,
+            121
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        653018468280048,
+        "fixed",
+        30,
+        2.9,
+        "uni_pc",
+        "simple",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 653018468280048,
+        "control_after_generate": "fixed",
+        "steps": 30,
+        "cfg": 2.9,
+        "sampler_name": "uni_pc",
+        "scheduler": "simple",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 50,
+      "type": "SaveVideo",
+      "pos": [
+        3098.663434339084,
+        60.28748411538836
+      ],
+      "size": [
+        994.7208740617662,
+        893.7766992494129
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 97
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/steppe_demo_high_res",
+        "auto",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "video/steppe_demo_high_res",
+        "format": "auto",
+        "format.codec": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 48,
+      "type": "ModelSamplingSD3",
+      "pos": [
+        772.9795441344316,
+        37.02045586556828
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 94
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            95
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingSD3"
+      },
+      "widgets_values": [
+        8
+      ],
+      "widgets_values_named": {
+        "shift": 8
+      }
+    },
+    {
+      "id": 54,
+      "type": "VAEDecode",
+      "pos": [
+        1617.443443727045,
+        339.17366000546707
+      ],
+      "size": [
+        372.8610232958458,
+        46
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 103
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            105
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 55,
+      "type": "CreateVideo",
+      "pos": [
+        1619.8364959251805,
+        436.80432714676493
+      ],
+      "size": [
+        371.7882121753803,
+        150
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 105
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            106
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        16,
+        "auto",
+        "sRGB",
+        "none"
+      ],
+      "widgets_values_named": {
+        "fps": 16,
+        "bit_depth": "auto",
+        "color_space": "sRGB",
+        "codec": "none"
+      }
+    },
+    {
+      "id": 56,
+      "type": "SaveVideo",
+      "pos": [
+        2074.7294477020077,
+        54.77479543117079
+      ],
+      "size": [
+        998.135121163089,
+        896.5080969304713
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 106
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/steppe_demo_low_res",
+        "auto",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "video/steppe_demo_low_res",
+        "format": "auto",
+        "format.codec": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 61,
+      "type": "SteppeLoadUpscaler",
+      "pos": [
+        1141.693740297831,
+        43.53527045928457
+      ],
+      "size": [
+        401.61646552938737,
+        82.90291220128154
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "links": [
+            120
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeLoadUpscaler"
+      },
+      "widgets_values": [
+        "steppe_wan_2_1_200M_1step.safetensors",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "model_name": "steppe_wan_2_1_200M_1step.safetensors",
+        "dtype": "auto"
+      }
+    },
+    {
+      "id": 62,
+      "type": "SteppeUpscaleLatent",
+      "pos": [
+        1145.3712775375616,
+        174.05156144826628
+      ],
+      "size": [
+        396.40488263352927,
+        222
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "link": 120
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 121
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            122
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeUpscaleLatent"
+      },
+      "widgets_values": [
+        true,
+        true,
+        0.9,
+        1,
+        1,
+        1028731149352470,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "spatial": true,
+        "temporal": true,
+        "hff": 0.9,
+        "guidance": 1,
+        "steps": 1,
+        "seed": 1028731149352470,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 63,
+      "type": "MarkdownNote",
+      "pos": [
+        -545.122272727087,
+        4.26729218443513
+      ],
+      "size": [
+        393.99366648793193,
+        620.2512169937215
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Model Links",
+      "properties": {},
+      "widgets_values": [
+        "## Model Links\n\n**diffusion_models**\n\n- [wan2.1_t2v_1.3B_fp16.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors)\n\n**text_encoders**\n\n- [umt5_xxl_fp8_e4m3fn_scaled.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors)\n\n**latent upscaler**\n\n- [steppe_wan_2_1_200M_1step.safetensors](https://huggingface.co/TensorForger/Steppe-Wan2.1/resolve/main/steppe_wan_2_1_200M_1step.safetensors)\n\n**vae**\n\n- [wan_2.1_vae.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/vae/wan_2.1_vae.safetensors)\n\n\n\n## Model Storage Location\n\n```\n\ud83d\udcc2 ComfyUI/\n\u251c\u2500\u2500 \ud83d\udcc2 models/\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 diffusion_models/\n\u2502   \u2502   \u2514\u2500\u2500 wan2.1_t2v_1.3B_fp16.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 text_encoders/\n\u2502   \u2502   \u2514\u2500\u2500 umt5_xxl_fp8_e4m3fn_scaled.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 latent_upscale_models/\n\u2502   \u2502   \u2514\u2500\u2500 steppe_wan_2_1_200M_1step.safetensors\n\u2502   \u2514\u2500\u2500 \ud83d\udcc2 vae/\n\u2502       \u2514\u2500\u2500 wan_2.1_vae.safetensors\n```\n\n## Custom Nodes\n\n- [ComfyUI-Steppe](https://github.com/tensorforger/ComfyUI-Steppe)\n\n"
+      ],
+      "widgets_values_named": {
+        "text": "## Model Links\n\n**diffusion_models**\n\n- [wan2.1_t2v_1.3B_fp16.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors)\n\n**text_encoders**\n\n- [umt5_xxl_fp8_e4m3fn_scaled.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors)\n\n**latent upscaler**\n\n- [steppe_wan_2_1_200M_1step.safetensors](https://huggingface.co/TensorForger/Steppe-Wan2.1/resolve/main/steppe_wan_2_1_200M_1step.safetensors)\n\n**vae**\n\n- [steppe_wan_2_1_200M_1step.safetensors](https://huggingface.co/Comfy-Org/Wan-2.1/resolve/main/split_files/vae/wan_2.1_vae.safetensors)\n\n\n\n## Model Storage Location\n\n```\n\ud83d\udcc2 ComfyUI/\n\u251c\u2500\u2500 \ud83d\udcc2 models/\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 diffusion_models/\n\u2502   \u2502   \u2514\u2500\u2500 wan2.1_t2v_1.3B_fp16.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 text_encoders/\n\u2502   \u2502   \u2514\u2500\u2500 umt5_xxl_fp8_e4m3fn_scaled.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 latent_upscale_models/\n\u2502   \u2502   \u2514\u2500\u2500 steppe_wan_2_1_200M_1step.safetensors\n\u2502   \u2514\u2500\u2500 \ud83d\udcc2 vae/\n\u2502       \u2514\u2500\u2500 wan_2.1_vae.safetensors\n```\n\n## Custom Nodes\n\n- [ComfyUI-Steppe](https://github.com/tensorforger/ComfyUI-Steppe)\n\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    }
+  ],
+  "links": [
+    [
+      46,
+      6,
+      0,
+      3,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      52,
+      7,
+      0,
+      3,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      74,
+      38,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      75,
+      38,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      76,
+      39,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      91,
+      40,
+      0,
+      3,
+      3,
+      "LATENT"
+    ],
+    [
+      94,
+      37,
+      0,
+      48,
+      0,
+      "MODEL"
+    ],
+    [
+      95,
+      48,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      96,
+      8,
+      0,
+      49,
+      0,
+      "IMAGE"
+    ],
+    [
+      103,
+      3,
+      0,
+      54,
+      0,
+      "LATENT"
+    ],
+    [
+      104,
+      39,
+      0,
+      54,
+      1,
+      "VAE"
+    ],
+    [
+      105,
+      54,
+      0,
+      55,
+      0,
+      "IMAGE"
+    ],
+    [
+      120,
+      61,
+      0,
+      62,
+      0,
+      "STEPPE_UPSCALER"
+    ],
+    [
+      121,
+      3,
+      0,
+      62,
+      1,
+      "LATENT"
+    ],
+    [
+      122,
+      62,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      97,
+      49,
+      0,
+      50,
+      0,
+      "VIDEO"
+    ],
+    [
+      106,
+      55,
+      0,
+      56,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Generate Low Resolution Video",
+      "bounding": [
+        300,
+        -30,
+        800.0825602109473,
+        655.9707567197318
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Load models",
+      "bounding": [
+        -130,
+        -30,
+        410,
+        423.6000061035156
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Upscale",
+      "bounding": [
+        1124.7974565947115,
+        -28.33899068442555,
+        436.69482620304757,
+        447.3721468258962
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "Decode",
+      "bounding": [
+        1584.1046287954157,
+        -28.30441514275504,
+        431.5975504357659,
+        630.3437779286668
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "Preview and Save",
+      "bounding": [
+        2038.2593722722243,
+        -26.232636341059614,
+        2089.445966192833,
+        999.3286298198036
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.5209868481924583,
+      "offset": [
+        964.2794763263353,
+        673.6271331283731
+      ]
+    },
+    "frontendVersion": "1.53.6"
+  },
+  "version": 0.4
+}

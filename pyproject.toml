@@ -1,6 +1,6 @@
 [project]
 name = "steppe"
-version = "1.0.0"
+version = "1.0.1"
 description = "Steppe generative latent upscalers: 2x resolution and 2x frame rate in latent space for Wan 2.1 / Wan 2.2 14B / Qwen-Image latents, decoded directly by the VAE, no extra sampling pass."
 license = { file = "LICENSE" }
 readme = "README.md"

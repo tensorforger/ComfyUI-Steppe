@@ -6,3 +6,6 @@ dist/
 .venv/
 tests/output/
 *.safetensors
+.ruff_cache/
+.pytest_cache/
+node.zip

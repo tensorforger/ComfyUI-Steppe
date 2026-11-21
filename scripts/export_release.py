@@ -28,21 +28,21 @@ RELEASES = (
         "file_name": "steppe_wan_2_1_200M_1step.safetensors",
         "title": "Steppe Wan 2.1 200M 1-step",
         "description": "Single step generative 2x latent upscaler for Wan 2.1 VAE latents (images and videos), distilled from the 200M base model.",
-        "recommended": {"hff": 0.9, "guidance": 2.0},
+        "recommended": {"hff": 0.9, "guidance": 1.0},
     },
     {
         "source_pattern": "wan_2_1_wan_pretrain_v1_ema_step*.safetensors",
         "file_name": "steppe_wan_2_1_200M_base.safetensors",
         "title": "Steppe Wan 2.1 200M base",
         "description": "Multi step (rectified flow) generative 2x latent upscaler for Wan 2.1 VAE latents (images and videos), classifier free guidance on the high frequency feature.",
-        "recommended": {"hff": 0.9, "guidance": 2.0, "steps": 20, "shift": 4.0},
+        "recommended": {"hff": 0.9, "guidance": 1.0, "steps": 20, "shift": 4.0},
     },
     {
         "source_pattern": "wan_2_1_wan_small_s20m_ema_step*.safetensors",
         "file_name": "steppe_wan_2_1_20M_1step.safetensors",
         "title": "Steppe Wan 2.1 20M 1-step",
         "description": "Lite single step generative 2x latent upscaler for Wan 2.1 VAE latents (images and videos).",
-        "recommended": {"hff": 0.9, "guidance": 2.0},
+        "recommended": {"hff": 0.9, "guidance": 1.0},
     },
 )
 

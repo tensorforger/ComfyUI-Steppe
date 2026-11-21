@@ -38,7 +38,7 @@ CATALOG: tuple[CatalogEntry, ...] = (
         latent_space="wan_2_1",
         kind="flow",
         version="1.0",
-        description="Multi step base model: most control (steps, CFG on hff), chained upscales.",
+        description="Multi step base model: most control (steps, CFG on hff), research; same quality as the 1-step model.",
     ),
     CatalogEntry(
         file_name="steppe_wan_2_1_20M_1step.safetensors",

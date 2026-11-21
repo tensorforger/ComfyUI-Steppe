@@ -34,7 +34,7 @@ HFF_TOOLTIP = (
     "Use 'Steppe Measure HFF' to take it from a reference image."
 )
 GUIDANCE_TOOLTIP = (
-    "1-step models: distilled guidance (trained on 1-3, no extra cost), 1 = off. "
+    "1-step models: distilled guidance (trained on 1-3, no extra cost); 1 = off (default, safe and stable), 2 also works well. "
     "Base model: classifier free guidance between hff and negative hff (null by default); "
     "the hff effect is subtle, so larger values (4-8) are needed for a visible change. 1 = off (2x faster)."
 )
@@ -201,7 +201,7 @@ def common_inputs() -> dict:
             {"default": False, "tooltip": "2x frame rate of videos: T -> 1 + 2 (T - 1) latent frames (4T - 3 -> 8T - 7 pixel frames). Ignored for images."},
         ),
         "hff": ("FLOAT", {"default": 0.9, "min": -1.0, "max": 1.0, "step": 0.01, "tooltip": HFF_TOOLTIP}),
-        "guidance": ("FLOAT", {"default": 2.0, "min": 1.0, "max": 30.0, "step": 0.1, "tooltip": GUIDANCE_TOOLTIP}),
+        "guidance": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 30.0, "step": 0.1, "tooltip": GUIDANCE_TOOLTIP}),
         "steps": ("INT", {"default": 20, "min": 1, "max": 200, "tooltip": "Base model only; 1-step models ignore it."}),
         "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF, "control_after_generate": True}),
     }
