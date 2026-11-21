@@ -13,6 +13,8 @@ base model, no hires fix, no prompt.
 
 <!-- TODO (stage 4): hero comparison card, video comparison GIF, workflow screenshot -->
 
+https://github.com/user-attachments/assets/5ac3da99-5d0a-496e-b78e-5911f3075968
+
 Models: [TensorForger/Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1) on Hugging Face.
 The nodes download them on first use.
 
