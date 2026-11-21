@@ -1,0 +1,37 @@
+[project]
+name = "steppe"
+version = "1.0.0"
+description = "Steppe generative latent upscalers: 2x resolution and 2x frame rate in latent space for Wan 2.1 / Wan 2.2 14B / Qwen-Image latents, decoded directly by the VAE, no extra sampling pass."
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "safetensors>=0.4",
+    "huggingface_hub>=0.23",
+]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Environment :: GPU :: NVIDIA CUDA",
+]
+keywords = ["comfyui", "latent upscaler", "upscaling", "super-resolution", "frame interpolation", "wan", "qwen-image"]
+
+[project.optional-dependencies]
+standalone = ["torch>=2.5"]
+
+[project.urls]
+Repository = "https://github.com/TensorForger/ComfyUI-Steppe"
+Models = "https://huggingface.co/TensorForger/Steppe-Wan2.1"
+"Bug Tracker" = "https://github.com/TensorForger/ComfyUI-Steppe/issues"
+
+[tool.comfy]
+PublisherId = "tensorforger"
+DisplayName = "Steppe Latent Upscaler"
+# Icon = "https://raw.githubusercontent.com/TensorForger/TensorForger/main/assets/steppe_icon.png"
+# Banner = "https://raw.githubusercontent.com/TensorForger/TensorForger/main/assets/steppe_banner.png"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["steppe"]

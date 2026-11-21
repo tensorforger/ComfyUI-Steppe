@@ -1,0 +1,13 @@
+Steppe
+Copyright (c) 2026 TensorForger. Licensed under the MIT License (see LICENSE).
+
+Steppe models operate on the latent space of the Wan 2.1 VAE and were trained on latents produced by it.
+
+Wan 2.1 VAE
+Copyright (c) 2025 Wan Team, Alibaba Group.
+Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+Source: https://github.com/Wan-Video/Wan2.1, https://huggingface.co/Wan-AI/Wan2.1-T2V-14B
+
+This software contains the per channel latent normalization statistics (latents_mean, latents_std) of the
+Wan 2.1 VAE configuration. It does not contain or redistribute Wan VAE weights or code; the VAE is obtained
+from its original source by the user. No modifications were made to the Wan VAE.
