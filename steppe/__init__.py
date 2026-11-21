@@ -15,7 +15,7 @@ from .latent_spaces import LATENT_SPACES, LatentSpace
 from .model import ModelInfo, SteppeUpscaler, load_upscaler, load_upscaler_file
 from .sampling import UpscaleSettings
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 __all__ = [
     "CATALOG",
