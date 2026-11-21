@@ -2,6 +2,12 @@
 
 [![Steppe: 4× detail, decoded directly. No second denoising pass of the base model.](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hero_cat.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hero_cat.png)
 
+> [!TIP]
+> ### 🌾 Try it in your browser: [Steppe demo on Hugging Face](https://huggingface.co/spaces/TensorForger/Steppe)
+> Upload an image and get a 2x or 4x Steppe upscale. Nothing to install.
+>
+> [![Open in Hugging Face Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-xl-dark.svg)](https://huggingface.co/spaces/TensorForger/Steppe)
+
 **Steppe** is a family of *generative latent upscalers*: small generative models trained only for upscaling, which
 run directly on VAE latents. The upscaled latent is **decoded straight by the VAE**: no second sampling pass of the
 base model, no hires fix, no prompt.
