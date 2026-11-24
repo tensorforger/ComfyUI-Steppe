@@ -11,3 +11,14 @@ Source: https://github.com/Wan-Video/Wan2.1, https://huggingface.co/Wan-AI/Wan2.
 This software contains the per channel latent normalization statistics (latents_mean, latents_std) of the
 Wan 2.1 VAE configuration. It does not contain or redistribute Wan VAE weights or code; the VAE is obtained
 from its original source by the user. No modifications were made to the Wan VAE.
+
+Steppe FLUX.2 models operate on the latent space of the FLUX.2 VAE and were trained on latents produced by it.
+
+FLUX.2 VAE (autoencoder)
+Copyright (c) 2025 Black Forest Labs.
+Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+Source: https://github.com/black-forest-labs/flux2, https://huggingface.co/black-forest-labs/FLUX.2-dev (ae.safetensors)
+
+The FLUX.2 VAE is licensed separately from the FLUX.2 [dev] model weights (FLUX Non-Commercial License). This
+software does not contain or redistribute FLUX.2 VAE or model weights or code; it works on latents in the 2x2 packed,
+batch norm normalized layout produced by ComfyUI and diffusers. No modifications were made to the FLUX.2 VAE.

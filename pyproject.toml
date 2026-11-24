@@ -1,7 +1,7 @@
 [project]
 name = "steppe"
-version = "1.0.3"
-description = "Steppe generative latent upscalers: 2x resolution and 2x frame rate in latent space for Wan 2.1 / Wan 2.2 14B / Qwen-Image latents, decoded directly by the VAE, no extra sampling pass."
+version = "1.1.0"
+description = "Steppe generative latent upscalers: 2x resolution and 2x frame rate in latent space for Wan 2.1 / Wan 2.2 14B / Qwen-Image and FLUX.2 / MOSS-Image latents, decoded directly by the VAE, no extra sampling pass."
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,7 +12,7 @@ dependencies = [
 classifiers = [
     "Operating System :: OS Independent",
 ]
-keywords = ["comfyui", "latent upscaler", "upscaling", "super-resolution", "frame interpolation", "wan", "qwen-image"]
+keywords = ["comfyui", "latent upscaler", "upscaling", "super-resolution", "frame interpolation", "wan", "qwen-image", "flux", "flux.2", "moss-image"]
 
 [project.optional-dependencies]
 standalone = ["torch>=2.5"]
@@ -20,6 +20,7 @@ standalone = ["torch>=2.5"]
 [project.urls]
 Repository = "https://github.com/TensorForger/ComfyUI-Steppe"
 Models = "https://huggingface.co/TensorForger/Steppe-Wan2.1"
+"Models FLUX.2" = "https://huggingface.co/TensorForger/Steppe-Flux.2"
 "Bug Tracker" = "https://github.com/TensorForger/ComfyUI-Steppe/issues"
 
 [tool.comfy]

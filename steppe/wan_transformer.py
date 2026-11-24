@@ -433,6 +433,8 @@ class SteppeWanTransformer(nn.Module):
     condition of the single step students.
     """
 
+    supports_temporal = True
+
     def __init__(self, config: WanTransformerConfig, guided: bool) -> None:
         super().__init__()
         dim = config.width
@@ -452,6 +454,16 @@ class SteppeWanTransformer(nn.Module):
     @property
     def dtype(self) -> torch.dtype:
         return self.input_conv.weight.dtype
+
+    def from_residual(self, residual: torch.Tensor, latents_source: torch.Tensor) -> torch.Tensor:
+        """
+        args:
+            residual: [B, C, T_hr, H_hr, W_hr]
+            latents_source: [B, C, T_lr, H_lr, W_lr], normalized
+        returns:
+            latents_target: [B, C, T_hr, H_hr, W_hr], normalized, dtype: torch.float32
+        """
+        return from_residual(residual, latents_source)
 
     def forward(
         self,

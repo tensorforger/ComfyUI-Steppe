@@ -19,7 +19,12 @@ sys.path.insert(0, str(REPOSITORY_ROOT))
 sys.path.insert(0, str(STDEV_PATH / "src"))
 
 from steppe import UpscaleSettings, load_upscaler_file, wan_transformer  # noqa: E402
+from steppe.latent_spaces import FLUX_2  # noqa: E402
+from stdev.comfy_nodes.flux_2 import sampling as flux_sampling  # noqa: E402
 from stdev.comfy_nodes.wan_2_1 import distilled_sampling, sampling  # noqa: E402
+from stdev.flux_distill.student import FluxStudentTransformer, upscale_single_step  # noqa: E402
+from stdev.flux_pretrain.model import FluxUpscalerTransformer  # noqa: E402
+from stdev.flux_pretrain.model import ModelConfig as FluxModelConfig  # noqa: E402
 from stdev.wan_distill.student import WanStudentTransformer  # noqa: E402
 from stdev.wan_pretrain.model import ModelConfig, WanUpscalerTransformer  # noqa: E402
 
@@ -30,6 +35,12 @@ CASES = (
     ("image, padded grid", (1, 16, 1, 30, 44), True, False),
     ("video, spatial and temporal", (1, 16, 5, 24, 32), True, True),
     ("video, temporal only", (2, 16, 4, 32, 40), False, True),
+)
+
+# ComfyUI FLUX.2 latents: [B, 128, H / 16, W / 16], 2x2 packed and batch norm normalized
+FLUX_CASES = (
+    ("image, padded grid", (1, 128, 15, 22)),
+    ("batch of 2", (2, 128, 16, 16)),
 )
 
 
@@ -138,6 +149,91 @@ def check_chunking(device: torch.device) -> bool:
     return report("chunked vs whole", chunked, whole, 1e-3)
 
 
+def load_flux_reference(path: str, student: bool) -> torch.nn.Module:
+    upscaler = load_upscaler_file(path, torch.float32)
+    config = dict(upscaler.info.config)
+    config["residual_std"] = tuple(config["residual_std"])
+    reference = (FluxStudentTransformer if student else FluxUpscalerTransformer)(FluxModelConfig(**config))
+    reference.load_state_dict(upscaler.model.state_dict())
+    return reference.to(torch.bfloat16).eval().requires_grad_(False)
+
+
+def flux_latents(shape: tuple[int, ...], device: torch.device) -> torch.Tensor:
+    generator = torch.Generator().manual_seed(4321)
+    return torch.randn(shape, generator=generator).to(device)
+
+
+def check_flux_packing() -> bool:
+    print("FLUX.2 packing (must be exact)")
+    latents = flux_latents((2, 128, 6, 10), torch.device("cpu"))
+    unpacked = FLUX_2.normalize(latents[:, :, None])[:, :, 0]
+    expected = flux_sampling.unpatchify_latents(latents)
+    passed = report("unpack vs STDev unpatchify", unpacked, expected, 1e-6)
+    return passed & report("pack(unpack)", FLUX_2.denormalize(unpacked[:, :, None])[:, :, 0], latents, 1e-6)
+
+
+def check_flux_flow_model(device: torch.device) -> bool:
+    path = newest_checkpoint("flux_2_flux_pretrain_v1_raw_*.safetensors")
+    print(f"FLUX.2 flow model {Path(path).name}")
+    ours = load_upscaler_file(path, torch.bfloat16)
+    ours.model.to(device)
+    reference = load_flux_reference(path, student=False).to(device)
+    passed = True
+    for name, shape in FLUX_CASES:
+        for guidance in (1.0, 3.0):
+            latents = flux_latents(shape, device)
+            reference_settings = flux_sampling.UpscaleSettings(
+                steps=4, cfg=guidance, hff=0.9, negative_hff=None, shift=2.0, noise_scale=1.0, seed=7
+            )
+            expected = flux_sampling.upscale_latents(reference, latents, reference_settings, device, lambda: None)
+            settings = UpscaleSettings(steps=4, guidance=guidance, hff=0.9, seed=7)
+            passed &= report(f"{name}, guidance {guidance}", ours.upscale(latents, settings), expected)
+    latents = flux_latents(FLUX_CASES[0][1], device)
+    image = ours.upscale(latents, UpscaleSettings(steps=2, seed=1))
+    video_layout = ours.upscale(latents[:, :, None], UpscaleSettings(steps=2, seed=1, temporal=True))[:, :, 0]
+    passed &= report("5D input, temporal ignored = 4D input", video_layout, image, 1e-6)
+    resolved = ours.resolve_settings(UpscaleSettings())
+    passed &= resolved.steps == 30 and resolved.shift == 2.0 and not resolved.temporal
+    print(f"  {'ok  ' if passed else 'FAIL'} recommended sampler: steps {resolved.steps}, shift {resolved.shift}")
+    return passed
+
+
+def reference_flux_single_step(
+    reference: torch.nn.Module, latents: torch.Tensor, hff: float | None, guidance: float, seed: int
+) -> torch.Tensor:
+    """
+    STDev student sampling of ComfyUI latents: unpatchify, pad, per sample CPU noise (seed + index), patchify.
+    """
+    results = []
+    for index in range(latents.shape[0]):
+        source = flux_sampling.unpatchify_latents(latents[index : index + 1].float())
+        height, width = source.shape[2:]
+        padded = flux_sampling.pad_to_window_grid(source)
+        generator = torch.Generator().manual_seed(seed + index)
+        noise = torch.randn((1, 32, 2 * padded.shape[2], 2 * padded.shape[3]), generator=generator).to(latents.device)
+        hff_tensor = torch.full((1,), float("nan") if hff is None else hff, device=latents.device)
+        guidance_tensor = torch.full((1,), guidance, device=latents.device)
+        upscaled = upscale_single_step(reference, padded, hff_tensor, guidance_tensor, noise)
+        results.append(flux_sampling.patchify_latents(upscaled[:, :, : 2 * height, : 2 * width]).cpu())
+    return torch.cat(results)
+
+
+def check_flux_student(pattern: str, device: torch.device) -> bool:
+    path = newest_checkpoint(pattern)
+    print(f"FLUX.2 single step model {Path(path).name}")
+    ours = load_upscaler_file(path, torch.bfloat16)
+    ours.model.to(device)
+    reference = load_flux_reference(path, student=True).to(device)
+    passed = True
+    for name, shape in FLUX_CASES:
+        for hff, guidance in ((0.9, 2.0), (None, 1.0)):
+            latents = flux_latents(shape, device)
+            expected = reference_flux_single_step(reference, latents, hff, guidance, seed=3)
+            settings = UpscaleSettings(guidance=guidance, hff=hff, seed=3)
+            passed &= report(f"{name}, hff {hff}, guidance {guidance}", ours.upscale(latents, settings), expected)
+    return passed
+
+
 def main() -> None:
     device = torch.device("cuda")
     results = [
@@ -146,6 +242,10 @@ def main() -> None:
         check_student("wan_2_1_wan_small_s20m_*.safetensors", device),
         check_temporal_windows(device),
         check_chunking(device),
+        check_flux_packing(),
+        check_flux_flow_model(device),
+        check_flux_student("flux_2_flux_distill_v1_raw_*.safetensors", device),
+        check_flux_student("flux_2_flux_small_s20m_raw_*.safetensors", device),
     ]
     print("PASSED" if all(results) else "FAILED")
     sys.exit(0 if all(results) else 1)

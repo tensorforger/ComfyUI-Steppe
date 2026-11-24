@@ -6,22 +6,32 @@ STDev research code (metadata keys `vae`, `architecture`, `model_config`) are re
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import torch
 from safetensors import safe_open
 from safetensors.torch import load_file
 
 from . import catalog
+from .flux_transformer import FluxTransformerConfig, SteppeFluxTransformer
 from .latent_spaces import LatentSpace, get_latent_space
-from .sampling import UpscaleSettings, upscale_latents
+from .sampling import UpscalerNetwork, UpscaleSettings, upscale_latents
 from .wan_transformer import SteppeWanTransformer, WanTransformerConfig
 
 FORMAT_KEY = "steppe.format"
 FORMAT_VERSION = "1"
 KIND_FLOW = "flow"
 KIND_SINGLE_STEP = "single_step"
-DEVELOPMENT_KINDS = {"WanUpscalerTransformer": KIND_FLOW, "WanStudentTransformer": KIND_SINGLE_STEP}
+# STDev architecture name -> (latent space, kind); Wan files without `architecture` are flow models
+DEVELOPMENT_ARCHITECTURES = {
+    "WanUpscalerTransformer": ("wan_2_1", KIND_FLOW),
+    "WanStudentTransformer": ("wan_2_1", KIND_SINGLE_STEP),
+    "FluxUpscalerTransformer": ("flux_2", KIND_FLOW),
+    "FluxStudentTransformer": ("flux_2", KIND_SINGLE_STEP),
+}
+DEFAULT_DEVELOPMENT_ARCHITECTURE = {"wan_2_1": "WanUpscalerTransformer"}
+# recommended (steps, shift) of the multi step flow models per latent space
+RECOMMENDED_SAMPLERS = {"wan_2_1": (20, 4.0), "flux_2": (30, 2.0)}
 
 
 @dataclass(frozen=True)
@@ -52,14 +62,18 @@ def parse_model_info(path: str, metadata: dict[str, str]) -> ModelInfo | None:
             version=metadata.get("steppe.version"),
             config=json.loads(metadata["steppe.model_config"]),
         )
-    if metadata.get("vae") == "wan_2_1" and "model_config" in metadata:
-        architecture = metadata.get("architecture", "WanUpscalerTransformer")
-        if architecture not in DEVELOPMENT_KINDS:
+    vae = metadata.get("vae")
+    if "model_config" in metadata:
+        architecture = metadata.get("architecture", DEFAULT_DEVELOPMENT_ARCHITECTURE.get(vae))
+        if architecture not in DEVELOPMENT_ARCHITECTURES:
+            return None
+        latent_space, kind = DEVELOPMENT_ARCHITECTURES[architecture]
+        if vae != latent_space:
             return None
         return ModelInfo(
             name=name,
-            latent_space="wan_2_1",
-            kind=DEVELOPMENT_KINDS[architecture],
+            latent_space=latent_space,
+            kind=kind,
             version=None,
             config=json.loads(metadata["model_config"]),
         )
@@ -89,10 +103,10 @@ def make_release_metadata(info: ModelInfo, title: str, description: str) -> dict
 
 class SteppeUpscaler:
     """
-    A loaded Steppe model: 2x spatial and / or 2x temporal upscaling of raw VAE latents.
+    A loaded Steppe model: 2x spatial and / or 2x temporal upscaling of VAE latents.
     """
 
-    def __init__(self, model: SteppeWanTransformer, info: ModelInfo) -> None:
+    def __init__(self, model: UpscalerNetwork, info: ModelInfo) -> None:
         self.model = model
         self.info = info
         self.latent_space: LatentSpace = get_latent_space(info.latent_space)
@@ -100,6 +114,24 @@ class SteppeUpscaler:
     @property
     def is_single_step(self) -> bool:
         return self.info.kind == KIND_SINGLE_STEP
+
+    @property
+    def supports_temporal(self) -> bool:
+        return self.model.supports_temporal
+
+    def resolve_settings(self, settings: UpscaleSettings) -> UpscaleSettings:
+        """
+        returns:
+            settings with steps / shift None replaced by the recommended values of the model and temporal off for
+            spatial only models
+        """
+        steps, shift = RECOMMENDED_SAMPLERS[self.info.latent_space]
+        return replace(
+            settings,
+            steps=steps if settings.steps is None else settings.steps,
+            shift=shift if settings.shift is None else settings.shift,
+            temporal=settings.temporal and self.supports_temporal,
+        )
 
     def upscale(
         self,
@@ -109,27 +141,31 @@ class SteppeUpscaler:
         on_pass=lambda: None,
     ) -> torch.Tensor:
         """
-        Runs on `device` (default: the device of the model weights); the model is not moved.
+        Runs on `device` (default: the device of the model weights); the model is not moved. Temporal upscaling is
+        ignored by spatial only models.
 
         args:
-            latents: [B, C, T, H, W] or [B, C, H, W], raw VAE latents of the model's latent space
+            latents: [B, C, T, H, W] or [B, C, H, W], VAE latents of the model's latent space as ComfyUI and
+                diffusers hand them over (Wan 2.1: raw; FLUX.2: 2x2 packed and batch norm normalized)
         returns:
-            latents: [B, C, T_hr, H_hr, W_hr] or [B, C, H_hr, W_hr], raw VAE latents, dtype: torch.float32,
-                on the CPU
+            latents: [B, C, T_hr, H_hr, W_hr] or [B, C, H_hr, W_hr], same layout, dtype: torch.float32, on the CPU
         """
         device = torch.device(device) if device is not None else self.model.input_conv.weight.device
         image_layout = latents.ndim == 4
         if image_layout:
             latents = latents[:, :, None]
+        settings = self.resolve_settings(settings)
         upscaled = upscale_latents(self.model, self.latent_space, latents, settings, device, on_pass)
         return upscaled[:, :, 0] if image_layout else upscaled
 
 
-def build_model(info: ModelInfo) -> SteppeWanTransformer:
-    if info.latent_space != "wan_2_1":
-        raise ValueError(f"no network for latent space '{info.latent_space}'")
-    config = WanTransformerConfig(**info.config)
-    return SteppeWanTransformer(config, guided=info.kind == KIND_SINGLE_STEP)
+def build_model(info: ModelInfo) -> UpscalerNetwork:
+    guided = info.kind == KIND_SINGLE_STEP
+    if info.latent_space == "wan_2_1":
+        return SteppeWanTransformer(WanTransformerConfig(**info.config), guided=guided)
+    if info.latent_space == "flux_2":
+        return SteppeFluxTransformer(FluxTransformerConfig(**info.config), guided=guided)
+    raise ValueError(f"no network for latent space '{info.latent_space}'")
 
 
 def load_upscaler_file(path: str, dtype: torch.dtype = torch.bfloat16) -> SteppeUpscaler:

@@ -48,6 +48,30 @@ CATALOG: tuple[CatalogEntry, ...] = (
         version="1.0",
         description="Lite: single step, 10x smaller; very large outputs, real time use.",
     ),
+    CatalogEntry(
+        file_name="steppe_flux_2_200M_1step.safetensors",
+        repository="TensorForger/Steppe-Flux.2",
+        latent_space="flux_2",
+        kind="single_step",
+        version="1.0",
+        description="FLUX.2 default: single step, quality of the 30 step base model (images).",
+    ),
+    CatalogEntry(
+        file_name="steppe_flux_2_200M_base.safetensors",
+        repository="TensorForger/Steppe-Flux.2",
+        latent_space="flux_2",
+        kind="flow",
+        version="1.0",
+        description="FLUX.2 multi step base model: most control (steps, CFG on hff), research; same quality as the 1-step model.",
+    ),
+    CatalogEntry(
+        file_name="steppe_flux_2_20M_1step.safetensors",
+        repository="TensorForger/Steppe-Flux.2",
+        latent_space="flux_2",
+        kind="single_step",
+        version="1.0",
+        description="FLUX.2 lite: single step, 10x smaller; very large outputs, real time use (with a tiny decoder).",
+    ),
 )
 CATALOG_BY_FILE_NAME = {entry.file_name: entry for entry in CATALOG}
 

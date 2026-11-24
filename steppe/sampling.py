@@ -10,8 +10,13 @@ from typing import Callable
 import torch
 import torch.nn.functional as functional
 
+from .flux_transformer import WINDOW_SIZE as FLUX_WINDOW_SIZE
+from .flux_transformer import SteppeFluxTransformer
 from .latent_spaces import LatentSpace
-from .wan_transformer import WINDOW_SIZE, SteppeWanTransformer, from_residual
+from .wan_transformer import WINDOW_SIZE, SteppeWanTransformer
+
+UpscalerNetwork = SteppeWanTransformer | SteppeFluxTransformer
+assert FLUX_WINDOW_SIZE == WINDOW_SIZE
 
 NOISE_SCALE_SPATIAL = 1.0
 NOISE_SCALE_TEMPORAL = 0.8
@@ -25,7 +30,8 @@ class UpscaleSettings:
     guidance: classifier free guidance scale for multi step models (positive hff vs negative hff), distilled
         guidance input for single step models; 1 = no guidance.
     negative_hff: hff of the negative guidance branch of multi step models; None = null embedding.
-    steps, shift: Euler steps and SD3 sigma shift of multi step models (ignored by single step models).
+    steps, shift: Euler steps and SD3 sigma shift of multi step models (ignored by single step models); None = the
+        recommended values of the model (`SteppeUpscaler.resolve_settings`).
     noise_scale: initial noise temperature; None = 1.0 with spatial upscaling, 0.8 for temporal only.
     temporal_window: new source latent frames per window, 0 = the whole clip at once.
     temporal_context: source latent frames of overlap before every window after the first, >= 1.
@@ -36,8 +42,8 @@ class UpscaleSettings:
     hff: float | None = 0.9
     guidance: float = 1.0
     negative_hff: float | None = None
-    steps: int = 20
-    shift: float = 4.0
+    steps: int | None = None
+    shift: float | None = None
     noise_scale: float | None = None
     seed: int = 0
     temporal_window: int = 0
@@ -80,7 +86,7 @@ def pad_to_window_grid(latents: torch.Tensor, spatial: bool) -> torch.Tensor:
     return functional.pad(latents, (0, pad_width, 0, pad_height, 0, 0), mode="replicate")
 
 
-def count_model_passes(model: SteppeWanTransformer, settings: UpscaleSettings) -> int:
+def count_model_passes(model: UpscalerNetwork, settings: UpscaleSettings) -> int:
     """
     returns:
         network evaluations per sample and temporal window
@@ -108,7 +114,7 @@ def hff_inputs(value: float | None, device: torch.device) -> tuple[torch.Tensor,
 
 @torch.no_grad()
 def sample_flow(
-    model: SteppeWanTransformer,
+    model: UpscalerNetwork,
     latents_source: torch.Tensor,
     noise: torch.Tensor,
     settings: UpscaleSettings,
@@ -145,7 +151,7 @@ def sample_flow(
 
 @torch.no_grad()
 def sample_single_step(
-    model: SteppeWanTransformer,
+    model: UpscalerNetwork,
     latents_source: torch.Tensor,
     noise: torch.Tensor,
     settings: UpscaleSettings,
@@ -170,7 +176,7 @@ def sample_single_step(
 
 @torch.no_grad()
 def upscale_window(
-    model: SteppeWanTransformer,
+    model: UpscalerNetwork,
     latents_source: torch.Tensor,
     noise: torch.Tensor,
     settings: UpscaleSettings,
@@ -185,7 +191,7 @@ def upscale_window(
     """
     sampler = sample_single_step if model.guided else sample_flow
     residual = sampler(model, latents_source, noise, settings, on_pass)
-    latents = from_residual(residual, latents_source)
+    latents = model.from_residual(residual, latents_source)
     if not settings.spatial:
         latents[:, :, 0] = latents_source[:, :, 0].float()
     return latents
@@ -193,7 +199,7 @@ def upscale_window(
 
 @torch.no_grad()
 def upscale_sample(
-    model: SteppeWanTransformer,
+    model: UpscalerNetwork,
     latents_source: torch.Tensor,
     noise: torch.Tensor,
     settings: UpscaleSettings,
@@ -237,7 +243,7 @@ def upscale_sample(
 
 @torch.no_grad()
 def upscale_latents(
-    model: SteppeWanTransformer,
+    model: UpscalerNetwork,
     latent_space: LatentSpace,
     latents: torch.Tensor,
     settings: UpscaleSettings,
@@ -249,23 +255,26 @@ def upscale_latents(
     devices).
 
     args:
-        latents: [B, C, T, H, W], raw VAE latents
+        latents: [B, C, T, H, W], VAE latents as handed over by ComfyUI / diffusers (`LatentSpace`)
+        settings: steps and shift resolved for multi step models (not None)
     returns:
-        latents: [B, C, T_hr, H_hr, W_hr], raw VAE latents, dtype: torch.float32, on the CPU
+        latents: [B, C, T_hr, H_hr, W_hr], VAE latents as handed over, dtype: torch.float32, on the CPU
     """
     assert latents.ndim == 5 and latents.shape[1] == latent_space.channels, (
         f"expected {latent_space.display_name} latents [B, {latent_space.channels}, T, H, W], "
         f"got {tuple(latents.shape)}"
     )
     assert settings.spatial or settings.temporal, "enable spatial and / or temporal upscaling"
+    assert model.supports_temporal or not settings.temporal, "this model upscales spatially only"
+    assert model.guided or (settings.steps is not None and settings.shift is not None), "resolve steps and shift"
     if settings.noise_scale is None:
         settings = replace(
             settings, noise_scale=NOISE_SCALE_SPATIAL if settings.spatial else NOISE_SCALE_TEMPORAL
         )
-    target_size = target_size_of(tuple(latents.shape[2:]), settings.spatial, settings.temporal)
     results = []
     for index in range(latents.shape[0]):
         normalized = latent_space.normalize(latents[index : index + 1].to(device))
+        target_size = target_size_of(tuple(normalized.shape[2:]), settings.spatial, settings.temporal)
         padded = pad_to_window_grid(normalized, settings.spatial)
         padded_target = target_size_of(tuple(padded.shape[2:]), settings.spatial, settings.temporal)
         generator = torch.Generator().manual_seed(settings.seed + index)

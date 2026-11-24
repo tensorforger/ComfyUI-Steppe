@@ -1,6 +1,10 @@
 """
 ComfyUI nodes of Steppe generative latent upscalers. Models live in models/latent_upscale_models; released models
 are listed even when missing and are downloaded from Hugging Face on first use.
+
+One loader lists the models of every supported VAE latent space (Wan 2.1, FLUX.2); the upscale nodes are shared
+and take their latent space from the loaded model. Compatibility rule for saved workflows: never remove, rename or
+reorder node inputs or released model names; new inputs only at the end, new models only appended.
 """
 
 import logging
@@ -16,6 +20,7 @@ import folder_paths
 
 from .steppe import catalog
 from .steppe.hff import compute_raw_immerkaer, quantile_normalize
+from .steppe.latent_spaces import LATENT_SPACES, LatentSpace
 from .steppe.model import SteppeUpscaler, load_upscaler_file, parse_model_info, read_metadata
 from .steppe.sampling import UpscaleSettings, count_model_passes, count_temporal_windows, target_size_of
 
@@ -34,9 +39,17 @@ HFF_TOOLTIP = (
     "Use 'Steppe Measure HFF' to take it from a reference image."
 )
 GUIDANCE_TOOLTIP = (
-    "1-step models: distilled guidance (trained on 1-3, no extra cost); 1 = off (default, safe and stable), 2 also works well. "
-    "Base model: classifier free guidance between hff and negative hff (null by default); "
-    "the hff effect is subtle, so larger values (4-8) are needed for a visible change. 1 = off (2x faster)."
+    "1-step models: distilled guidance (trained on 1-3 for Wan 2.1, 1-2 for FLUX.2, no extra cost); "
+    "1 = off (default, safe and stable), 2 also works well. "
+    "Base models: classifier free guidance between hff and negative hff (null by default). Wan 2.1: the hff effect "
+    "is subtle, larger values (4-8) are needed for a visible change; FLUX.2 reacts much more strongly to hff. "
+    "1 = off (2x faster)."
+)
+STEPS_TOOLTIP = "Base models only (1-step models ignore it). 0 = recommended: 20 for Wan 2.1, 30 for FLUX.2."
+SHIFT_TOOLTIP = "Base models: sigma shift of the sampling schedule. 0 = recommended: 4 for Wan 2.1, 2 for FLUX.2."
+TEMPORAL_TOOLTIP = (
+    "2x frame rate of videos: T -> 1 + 2 (T - 1) latent frames (4T - 3 -> 8T - 7 pixel frames). "
+    "Ignored for images and by image-only models (FLUX.2)."
 )
 
 
@@ -112,7 +125,11 @@ class SteppeLoadUpscaler:
     RETURN_TYPES = (UPSCALER_TYPE,)
     RETURN_NAMES = ("upscaler",)
     FUNCTION = "load"
-    DESCRIPTION = "Loads a Steppe latent upscaler. Released models are downloaded from Hugging Face on first use."
+    DESCRIPTION = (
+        "Loads a Steppe latent upscaler. Pick a model for the VAE of your workflow: steppe_wan_2_1_* for the Wan 2.1 "
+        "VAE (Wan 2.1, Wan 2.2 14B, Qwen-Image, Krea 2), steppe_flux_2_* for the FLUX.2 VAE (FLUX.2 [dev] / [klein], "
+        "MOSS-Image). Released models are downloaded from Hugging Face on first use."
+    )
 
     @classmethod
     def INPUT_TYPES(cls) -> dict:
@@ -135,10 +152,14 @@ class SteppeLoadUpscaler:
 
 def estimate_memory(upscaler: SteppeUpscaler, samples_shape: tuple[int, ...], settings: UpscaleSettings) -> float:
     """
+    args:
+        samples_shape: (B, C, T, H, W) of the latents as handed over
     returns:
         rough peak activation memory in bytes of one sample and temporal window
     """
     source_frames, height, width = samples_shape[2:]
+    patch = upscaler.latent_space.patch_size
+    height, width = height * patch, width * patch
     if settings.temporal_window > 0:
         source_frames = min(source_frames, settings.temporal_window + settings.temporal_context)
     frames, target_height, target_width = target_size_of((source_frames, height, width), settings.spatial, settings.temporal)
@@ -151,22 +172,39 @@ def estimate_memory(upscaler: SteppeUpscaler, samples_shape: tuple[int, ...], se
     )
 
 
+def matches_latent_space(samples: torch.Tensor, space: LatentSpace) -> bool:
+    if samples.shape[1] != space.channels:
+        return False
+    return samples.ndim == 4 or (samples.ndim == 5 and (space.video or samples.shape[2] == 1))
+
+
+def check_latent(upscaler: SteppeUpscaler, samples: torch.Tensor) -> None:
+    space = upscaler.latent_space
+    if samples.ndim in (4, 5) and matches_latent_space(samples, space):
+        return
+    hint = ""
+    others = [other for other in LATENT_SPACES.values() if other is not space and matches_latent_space(samples, other)]
+    if others:
+        prefixes = " or ".join(f"steppe_{other.name}_*" for other in others)
+        hint = f" This looks like a {others[0].display_name} latent: load a {prefixes} model instead."
+    raise ValueError(
+        f"{upscaler.info.name} upscales {space.display_name} latents ({space.channels} channels; "
+        f"{space.compatible_models}), got shape {tuple(samples.shape)}.{hint}"
+    )
+
+
 def run_upscale(model: SteppeModel, latent: dict, settings: UpscaleSettings) -> tuple[dict]:
     upscaler = model.upscaler
     samples = latent["samples"]
-    space = upscaler.latent_space
-    if samples.ndim not in (4, 5) or samples.shape[1] != space.channels:
-        raise ValueError(
-            f"{upscaler.info.name} upscales {space.display_name} latents ({space.channels} channels: Wan 2.1, "
-            f"Wan 2.2 14B, Qwen-Image and other models using this VAE), got shape {tuple(samples.shape)}. "
-            "Wan 2.2 5B uses a different VAE (48 channels) and is not supported."
-        )
+    check_latent(upscaler, samples)
     frames = samples.shape[2] if samples.ndim == 5 else 1
-    temporal = settings.temporal and frames > 1
+    if settings.temporal and frames > 1 and not upscaler.supports_temporal:
+        logger.info("Steppe: %s upscales spatially only, temporal is ignored", upscaler.info.name)
+    temporal = settings.temporal and frames > 1 and upscaler.supports_temporal
     if not settings.spatial and not temporal:
-        logger.warning("Steppe: nothing to upscale (spatial off, temporal off or single frame)")
+        logger.warning("Steppe: nothing to upscale (spatial off, temporal off, single frame or image-only model)")
         return (latent,)
-    settings = replace(settings, temporal=temporal)
+    settings = upscaler.resolve_settings(replace(settings, temporal=temporal))
     layout_shape = samples.shape if samples.ndim == 5 else (samples.shape[0], samples.shape[1], 1, *samples.shape[2:])
     memory_required = estimate_memory(upscaler, tuple(layout_shape), settings)
     try:
@@ -191,18 +229,22 @@ def optional_hff(value: float) -> float | None:
     return None if value < 0 else value
 
 
+def optional_positive(value: float) -> float | None:
+    """
+    0 (or less) = use the recommended value of the model
+    """
+    return None if value <= 0 else value
+
+
 def common_inputs() -> dict:
     return {
         "upscaler": (UPSCALER_TYPE,),
         "latent": ("LATENT",),
         "spatial": ("BOOLEAN", {"default": True, "tooltip": "2x height and width."}),
-        "temporal": (
-            "BOOLEAN",
-            {"default": False, "tooltip": "2x frame rate of videos: T -> 1 + 2 (T - 1) latent frames (4T - 3 -> 8T - 7 pixel frames). Ignored for images."},
-        ),
+        "temporal": ("BOOLEAN", {"default": False, "tooltip": TEMPORAL_TOOLTIP}),
         "hff": ("FLOAT", {"default": 0.9, "min": -1.0, "max": 1.0, "step": 0.01, "tooltip": HFF_TOOLTIP}),
         "guidance": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 30.0, "step": 0.1, "tooltip": GUIDANCE_TOOLTIP}),
-        "steps": ("INT", {"default": 20, "min": 1, "max": 200, "tooltip": "Base model only; 1-step models ignore it."}),
+        "steps": ("INT", {"default": 0, "min": 0, "max": 200, "tooltip": STEPS_TOOLTIP}),
         "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF, "control_after_generate": True}),
     }
 
@@ -212,7 +254,7 @@ class SteppeUpscaleLatent:
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "upscale"
     DESCRIPTION = (
-        "2x latent upscaling (spatial) and / or 2x frame rate (temporal) with a Steppe model. "
+        "2x latent upscaling (spatial) and / or 2x frame rate (temporal, Wan 2.1 models) with a Steppe model. "
         "The result is decoded directly with the VAE, no extra sampling pass needed."
     )
 
@@ -232,7 +274,12 @@ class SteppeUpscaleLatent:
         seed: int,
     ) -> tuple[dict]:
         settings = UpscaleSettings(
-            spatial=spatial, temporal=temporal, hff=optional_hff(hff), guidance=guidance, steps=steps, seed=seed
+            spatial=spatial,
+            temporal=temporal,
+            hff=optional_hff(hff),
+            guidance=guidance,
+            steps=optional_positive(steps),
+            seed=seed,
         )
         return run_upscale(upscaler, latent, settings)
 
@@ -252,7 +299,7 @@ class SteppeUpscaleLatentAdvanced:
                     "FLOAT",
                     {"default": -1.0, "min": -1.0, "max": 1.0, "step": 0.01, "tooltip": "Base model: hff of the negative guidance branch. -1 = no hff (null)."},
                 ),
-                "shift": ("FLOAT", {"default": 4.0, "min": 0.1, "max": 20.0, "step": 0.1, "tooltip": "Base model: sigma shift of the sampling schedule."}),
+                "shift": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 20.0, "step": 0.1, "tooltip": SHIFT_TOOLTIP}),
                 "noise_scale": (
                     "FLOAT",
                     {"default": -1.0, "min": -1.0, "max": 2.0, "step": 0.01, "tooltip": "Initial noise temperature. -1 = trained default (1.0 with spatial, 0.8 temporal only)."},
@@ -291,8 +338,8 @@ class SteppeUpscaleLatentAdvanced:
             hff=optional_hff(hff),
             guidance=guidance,
             negative_hff=optional_hff(negative_hff),
-            steps=steps,
-            shift=shift,
+            steps=optional_positive(steps),
+            shift=optional_positive(shift),
             noise_scale=None if noise_scale < 0 else noise_scale,
             seed=seed,
             temporal_window=temporal_window,

@@ -3,7 +3,9 @@ Converts STDev development checkpoints (safetensors with `vae` / `architecture` 
 released Steppe model files: release metadata, weights in bfloat16 (inference dtype), release file names.
 Also writes the `config.json` catalog of the model repository.
 
-Usage: python scripts/export_release.py --source-dir ../STDev/models/latent_upscale_models --output-dir ../Steppe-Wan2.1
+Usage:
+    python scripts/export_release.py --latent-space wan_2_1 --source-dir ../STDev/models/latent_upscale_models --output-dir ../Steppe-Wan2.1
+    python scripts/export_release.py --latent-space flux_2 --source-dir ../STDev/models/latent_upscale_models --output-dir ../Steppe-Flux.2
 """
 
 import argparse
@@ -22,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from steppe import catalog  # noqa: E402
 from steppe.model import make_release_metadata, parse_model_info, read_metadata  # noqa: E402
 
-RELEASES = (
+WAN_2_1_RELEASES = (
     {
         "source_pattern": "wan_2_1_wan_distill_v1_ema_step*.safetensors",
         "file_name": "steppe_wan_2_1_200M_1step.safetensors",
@@ -45,6 +47,33 @@ RELEASES = (
         "recommended": {"hff": 0.9, "guidance": 1.0},
     },
 )
+
+# FLUX.2: raw weights (better than EMA after the LR decay, see the STDev reports)
+FLUX_2_RELEASES = (
+    {
+        "source_pattern": "flux_2_flux_distill_v1_raw_step*.safetensors",
+        "file_name": "steppe_flux_2_200M_1step.safetensors",
+        "title": "Steppe FLUX.2 200M 1-step",
+        "description": "Single step generative 2x latent upscaler for FLUX.2 VAE latents (images), distilled from the 200M base model.",
+        "recommended": {"hff": 0.9, "guidance": 1.0},
+    },
+    {
+        "source_pattern": "flux_2_flux_pretrain_v1_raw_step*.safetensors",
+        "file_name": "steppe_flux_2_200M_base.safetensors",
+        "title": "Steppe FLUX.2 200M base",
+        "description": "Multi step (rectified flow) generative 2x latent upscaler for FLUX.2 VAE latents (images), classifier free guidance on the high frequency feature.",
+        "recommended": {"hff": 0.9, "guidance": 1.0, "steps": 30, "shift": 2.0},
+    },
+    {
+        "source_pattern": "flux_2_flux_small_s20m_raw_step*.safetensors",
+        "file_name": "steppe_flux_2_20M_1step.safetensors",
+        "title": "Steppe FLUX.2 20M 1-step",
+        "description": "Lite single step generative 2x latent upscaler for FLUX.2 VAE latents (images).",
+        "recommended": {"hff": 0.9, "guidance": 1.0},
+    },
+)
+
+RELEASES = {"wan_2_1": WAN_2_1_RELEASES, "flux_2": FLUX_2_RELEASES}
 
 
 def newest(directory: Path, pattern: str) -> Path:
@@ -78,23 +107,26 @@ def export(source: Path, release: dict, output_directory: Path, version: str) ->
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--latent-space", choices=sorted(RELEASES), default="wan_2_1")
     parser.add_argument("--source-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--version", default="1.0")
     arguments = parser.parse_args()
 
     arguments.output_dir.mkdir(parents=True, exist_ok=True)
+    releases = RELEASES[arguments.latent_space]
     models = {}
-    for release in RELEASES:
-        assert release["file_name"] in catalog.CATALOG_BY_FILE_NAME, release["file_name"]
+    for release in releases:
+        entry = catalog.CATALOG_BY_FILE_NAME[release["file_name"]]
+        assert entry.latent_space == arguments.latent_space, release["file_name"]
         source = newest(arguments.source_dir, release["source_pattern"])
         models[release["file_name"]] = export(source, release, arguments.output_dir, arguments.version)
     repository_catalog = {
         "format": "steppe-catalog",
         "format_version": 1,
         "project": "Steppe",
-        "latent_space": "wan_2_1",
-        "default_model": "steppe_wan_2_1_200M_1step.safetensors",
+        "latent_space": arguments.latent_space,
+        "default_model": releases[0]["file_name"],
         "implementation": "https://github.com/TensorForger/ComfyUI-Steppe",
         "models": models,
     }

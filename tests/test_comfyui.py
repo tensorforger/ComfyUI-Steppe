@@ -1,9 +1,12 @@
 """
-End to end test of the nodes inside a ComfyUI installation (no server): Wan 2.1 VAE encode of an image, Steppe
-upscaling with every released model, VAE decode, PNGs in tests/output; plus a long video latent for memory and
+End to end test of the nodes inside a ComfyUI installation (no server): VAE encode of an image, Steppe upscaling
+with every released model of the VAE's latent space, VAE decode, PNGs in tests/output; a check that a model of
+another latent space rejects the latent with a clear error; for Wan 2.1 also a long video latent for memory and
 speed. Run with the ComfyUI Python environment.
 
-Usage: python tests/test_comfyui.py --comfyui ~/comfyui --models-dir ../Steppe-Wan2.1 --image photo.jpg
+Usage:
+    python tests/test_comfyui.py --comfyui ~/comfyui --models-dir ../Steppe-Wan2.1 ../Steppe-Flux.2 --image photo.jpg
+    python tests/test_comfyui.py --comfyui ~/comfyui --models-dir ../Steppe-Flux.2 ../Steppe-Wan2.1 --image photo.jpg --vae flux2-vae.safetensors
 """
 
 import argparse
@@ -52,7 +55,9 @@ def save_image(image: torch.Tensor, name: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--comfyui", type=Path, required=True)
-    parser.add_argument("--models-dir", type=Path, required=True)
+    parser.add_argument(
+        "--models-dir", type=Path, nargs="+", required=True, help="model folders, the first one is the download target"
+    )
     parser.add_argument("--image", type=Path, required=True)
     parser.add_argument("--vae", default="wan_2.1_vae.safetensors")
     parser.add_argument("--size", type=int, default=512)
@@ -63,7 +68,8 @@ def main() -> None:
     import folder_paths
     import nodes as comfy_nodes
 
-    folder_paths.add_model_folder_path("latent_upscale_models", str(arguments.models_dir.resolve()), is_default=True)
+    for directory in reversed(arguments.models_dir):
+        folder_paths.add_model_folder_path("latent_upscale_models", str(directory.resolve()), is_default=True)
     pack = import_node_pack()
     steppe_nodes = sys.modules["ComfyUI_Steppe.nodes"]
     mappings = pack.NODE_CLASS_MAPPINGS
@@ -82,21 +88,40 @@ def main() -> None:
     print(f"hff of the input image: {measured}")
 
     upscale = mappings["SteppeUpscaleLatent"]()
-    for model_name in [name for name in model_names if name.startswith("steppe_")]:
+    catalog = steppe_nodes.catalog.CATALOG_BY_FILE_NAME
+    space_name = next(
+        name
+        for name, space in steppe_nodes.LATENT_SPACES.items()
+        if steppe_nodes.matches_latent_space(latent["samples"], space)
+    )
+    released = [name for name in model_names if name in catalog and catalog[name].latent_space == space_name]
+    print(f"latent space {space_name}: {released}")
+    for model_name in released:
         (upscaler,) = mappings["SteppeLoadUpscaler"]().load(model_name, "auto")
         single_step = upscaler.upscaler.is_single_step
         for hff, guidance in ((0.9, 2.0), (-1.0, 1.0)) if single_step else ((0.9, 1.0), (0.9, 4.0)):
             torch.cuda.synchronize()
             start = time.perf_counter()
-            (upscaled,) = upscale.upscale(upscaler, latent, True, False, hff, guidance, 20, 0)
+            (upscaled,) = upscale.upscale(upscaler, latent, True, False, hff, guidance, 0, 0)
             torch.cuda.synchronize()
             elapsed = time.perf_counter() - start
             (decoded,) = comfy_nodes.VAEDecode().decode(vae, upscaled)
             print(f"{model_name} hff {hff} guidance {guidance}: latent {tuple(upscaled['samples'].shape)}, upscale {elapsed * 1000:.0f} ms")
             save_image(decoded.reshape(1, *decoded.shape[-3:]), f"{Path(model_name).stem}_hff{hff}_g{guidance}.png")
 
+    other = next(name for name in catalog if catalog[name].latent_space != space_name)
+    (wrong,) = mappings["SteppeLoadUpscaler"]().load(other, "auto")
+    try:
+        upscale.upscale(wrong, latent, True, False, 0.9, 1.0, 0, 0)
+        raise AssertionError(f"{other} accepted a {space_name} latent")
+    except ValueError as error:
+        print(f"wrong VAE rejected: {error}")
+    del wrong
+    if space_name != "wan_2_1":
+        return
+
     (upscaler,) = mappings["SteppeLoadUpscaler"]().load("steppe_wan_2_1_200M_1step.safetensors", "auto")
-    video = {"samples": torch.randn(1, 16, 21, 60, 104) * 1.5}
+    video ={"samples": torch.randn(1, 16, 21, 60, 104) * 1.5}
     advanced = mappings["SteppeUpscaleLatentAdvanced"]()
     for spatial, temporal, window in ((True, True, 0), (True, True, 9), (False, True, 0)):
         comfy.model_management.soft_empty_cache()

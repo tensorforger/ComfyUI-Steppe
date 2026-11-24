@@ -16,14 +16,17 @@ base model, no hires fix, no prompt.
 - **2x frame rate** of videos (latent frame interpolation), also combined with 2x resolution.
 - **One step**: about 45 ms for a 1024 px image with the default model. Most of the time goes to the VAE decode.
 - **Sharpness control** through the high frequency feature (hff).
-- Works with latents of the **Wan 2.1 VAE**, which is used by Wan 2.1, Wan 2.2 14B, Qwen-Image, Qwen-Image-Edit and
-  Krea 2, among others. Both `wan_2.1_vae` and `qwen_image_vae` decode the upscaled latents.
+- Works with latents of two VAEs, one model family each, all in the same loader and upscale nodes:
+  - **Wan 2.1 VAE** (images and videos): Wan 2.1, Wan 2.2 14B, Qwen-Image, Qwen-Image-Edit and Krea 2, among others.
+    Both `wan_2.1_vae` and `qwen_image_vae` decode the upscaled latents.
+  - **FLUX.2 VAE** (images): FLUX.2 [dev], FLUX.2 [klein] and MOSS-Image.
 
 https://github.com/user-attachments/assets/5ac3da99-5d0a-496e-b78e-5911f3075968
 
 *Wan 2.1 1.3B, 640x512 at 16 fps → Steppe 1280x1024 at 32 fps (2x resolution and 2x frame rate in one pass).*
 
-Models: [TensorForger/Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1) on Hugging Face.
+Models: [TensorForger/Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1) and
+[TensorForger/Steppe-Flux.2](https://huggingface.co/TensorForger/Steppe-Flux.2) on Hugging Face.
 The nodes download them on first use.
 
 ## Gallery
@@ -49,24 +52,33 @@ upscaled by the same factor from the same input. Click an image for the full res
   ```
 
 The nodes download models into `ComfyUI/models/latent_upscale_models` on first use. You can also download them
-yourself from [Hugging Face](https://huggingface.co/TensorForger/Steppe-Wan2.1) into that folder.
+yourself from Hugging Face ([Wan 2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1),
+[FLUX.2](https://huggingface.co/TensorForger/Steppe-Flux.2)) into that folder.
 
 ## Models
 
 [![Three models, one node](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/models_lineup.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/models_lineup.png)
 
+Pick the models of the VAE your workflow uses: `steppe_wan_2_1_*` for the Wan 2.1 VAE, `steppe_flux_2_*` for the
+FLUX.2 VAE. A model of the wrong VAE stops with an error that names the right one.
+
 | file | steps | size | use |
 |---|---|---|---|
-| `steppe_wan_2_1_200M_1step.safetensors` | 1 | 445 MB | **default**: the quality of the base model in one step |
+| `steppe_wan_2_1_200M_1step.safetensors` | 1 | 445 MB | Wan 2.1 VAE **default**: the quality of the base model in one step |
 | `steppe_wan_2_1_200M_base.safetensors` | 1-200 (20) | 444 MB | most control and research: steps, CFG on hff; same quality as 1-step |
 | `steppe_wan_2_1_20M_1step.safetensors` | 1 | 39 MB | lite: very large outputs (2048 → 4096), real time |
+| `steppe_flux_2_200M_1step.safetensors` | 1 | 385 MB | FLUX.2 VAE **default**: the quality of the base model in one step |
+| `steppe_flux_2_200M_base.safetensors` | 1-200 (30) | 384 MB | most control and research: steps, CFG on hff; same quality as 1-step |
+| `steppe_flux_2_20M_1step.safetensors` | 1 | 40 MB | lite: very large outputs, real time (with a tiny decoder) |
+
+The FLUX.2 models upscale images only (no `temporal`).
 
 ## Nodes
 
 | node | what it does |
 |---|---|
 | **Load Steppe Upscaler** | Loads a model and downloads released models if missing. `dtype`: auto (bfloat16 where supported) or float32. |
-| **Steppe Upscale Latent** | Upscales a `LATENT`: `spatial` 2x resolution, `temporal` 2x frame rate, `hff`, `guidance`, `steps` (base model only), `seed`. |
+| **Steppe Upscale Latent** | Upscales a `LATENT`: `spatial` 2x resolution, `temporal` 2x frame rate (Wan 2.1), `hff`, `guidance`, `steps` (base models only, 0 = recommended), `seed`. |
 | **Steppe Upscale Latent (Advanced)** | Adds `negative_hff`, `shift`, `noise_scale` and temporal windows for long videos. |
 | **Steppe Measure HFF** | The hff value of an image, e.g. to match the sharpness of a reference. |
 
@@ -92,10 +104,13 @@ The model links and folders are in the note inside each workflow.
   turns hff off and lets the model choose. The values are absolute: Steppe Measure HFF on a photo at the target
   resolution gives a value that matches it.
 - **guidance**:
-  - 1-step models: distilled guidance, trained on 1-3. The default `1` turns it off and is safe and stable; `2` also
-    works well. It is a model input, so it costs nothing.
-  - Base model: classifier free guidance between `hff` and `negative_hff` (default: no hff). The effect is subtle,
-    so use 4-8 for a visible change. Guidance above 1 costs two passes per step.
+  - 1-step models: distilled guidance, trained on 1-3 (FLUX.2: 1-2). The default `1` turns it off and is safe and
+    stable; `2` also works well. It is a model input, so it costs nothing.
+  - Base models: classifier free guidance between `hff` and `negative_hff` (default: no hff). On Wan 2.1 the effect
+    is subtle, so use 4-8 for a visible change; FLUX.2 reacts much more strongly to hff. Guidance above 1 costs two
+    passes per step.
+- **steps** / **shift** (base models): `0` uses the recommended values, 20 steps / shift 4 for Wan 2.1 and 30 steps /
+  shift 2 for FLUX.2.
 - **temporal**: T latent frames become 1 + 2 (T - 1), i.e. 81 → 161 pixel frames for Wan. The first frame is kept.
 - **temporal_window** (Advanced): long videos run without windows, since memory is handled by chunking. Windows of
   about 8-16 source latent frames keep each piece close to the training clip length.
@@ -110,8 +125,8 @@ The model links and folders are in the note inside each workflow.
 - **Decoding large outputs**: use `VAE Decode (Tiled)` for 2048 px images and upscaled videos.
 - **Video**: 81 frames at 480x832 → 960x1664 at 2x frame rate takes 3.5 s and 9 GB peak VRAM with the 1-step model
   (RTX 5090), plus the VAE decode.
-- **Not supported**: the Wan 2.2 5B (TI2V) VAE (48 channels), and FLUX, SD3 and SDXL latents. 16 channel FLUX.1 /
-  SD3 latents pass the channel check but give wrong results.
+- **Not supported**: the Wan 2.2 5B (TI2V) VAE (48 channels), and FLUX.1, SD3 and SDXL latents. 16 channel FLUX.1 /
+  SD3 latents pass the Wan 2.1 channel check but give wrong results.
 
 ## How it works
 
@@ -161,6 +176,12 @@ upscaler = load_upscaler("steppe_wan_2_1_200M_1step.safetensors")  # downloads f
 upscaler.model.to("cuda")
 # raw (unnormalized) Wan 2.1 VAE latents, [B, 16, T, H, W] or [B, 16, H, W]
 upscaled = upscaler.upscale(latents, UpscaleSettings(spatial=True, temporal=False, hff=0.9, guidance=1.0))
+
+flux_upscaler = load_upscaler("steppe_flux_2_200M_1step.safetensors")
+flux_upscaler.model.to("cuda")
+# FLUX.2 latents as ComfyUI and the diffusers FLUX.2 pipelines use them: 2x2 packed and batch norm normalized,
+# [B, 128, H / 16, W / 16]
+flux_upscaled = flux_upscaler.upscale(flux_latents, UpscaleSettings(hff=0.9, guidance=1.0))
 ```
 
 ## Related
@@ -172,4 +193,5 @@ upscaled = upscaler.upscale(latents, UpscaleSettings(spatial=True, temporal=Fals
 
 ## License
 
-MIT (see `LICENSE`). Steppe works on latents of the Wan 2.1 VAE (Apache-2.0, Wan Team, Alibaba Group); see `NOTICE`.
+MIT (see `LICENSE`). Steppe works on latents of the Wan 2.1 VAE (Apache-2.0, Wan Team, Alibaba Group) and of the
+FLUX.2 VAE (Apache-2.0, Black Forest Labs); see `NOTICE`.
