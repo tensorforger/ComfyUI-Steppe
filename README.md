@@ -1,6 +1,6 @@
 # ComfyUI-Steppe
 
-[![Steppe: 4× detail, decoded directly. No second denoising pass of the base model.](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hero_cat.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hero_cat.png)
+[![Steppe: MOSS-Image 960x1280 upscaled 4x to 3840x5120 in latent space, bicubic vs Steppe zooms](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe_flux2/flux2_compare_cat.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe_flux2/flux2_compare_cat.png)
 
 > [!TIP]
 > ### 🌾 Try it in your browser: [Steppe demo on Hugging Face](https://huggingface.co/spaces/TensorForger/Steppe)
@@ -16,29 +16,23 @@ base model, no hires fix, no prompt.
 - **2x frame rate** of videos (latent frame interpolation), also combined with 2x resolution.
 - **One step**: about 45 ms for a 1024 px image with the default model. Most of the time goes to the VAE decode.
 - **Sharpness control** through the high frequency feature (hff).
-- Works with latents of two VAEs, one model family each, all in the same loader and upscale nodes:
-  - **Wan 2.1 VAE** (images and videos): Wan 2.1, Wan 2.2 14B, Qwen-Image, Qwen-Image-Edit and Krea 2, among others.
-    Both `wan_2.1_vae` and `qwen_image_vae` decode the upscaled latents.
-  - **FLUX.2 VAE** (images): FLUX.2 [dev], FLUX.2 [klein] and MOSS-Image.
+- Works with latents of two VAEs (see [Supported models](#supported-models)), all in the same loader and upscale nodes.
 
 https://github.com/user-attachments/assets/5ac3da99-5d0a-496e-b78e-5911f3075968
 
 *Wan 2.1 1.3B, 640x512 at 16 fps → Steppe 1280x1024 at 32 fps (2x resolution and 2x frame rate in one pass).*
 
-Models: [TensorForger/Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1) and
-[TensorForger/Steppe-Flux.2](https://huggingface.co/TensorForger/Steppe-Flux.2) on Hugging Face.
-The nodes download them on first use.
+## Supported models
 
-## Gallery
+Steppe models are trained per VAE: one model family serves every generative model that uses that VAE.
 
-[![Any style, one model](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_anime.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_anime.png)
+| generative models | VAE | Steppe models on Hugging Face | upscales |
+|---|---|---|---|
+| [Wan 2.1](https://huggingface.co/Wan-AI/Wan2.1-T2V-14B), [Wan 2.2 14B](https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B), [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image), [Qwen-Image-Edit](https://huggingface.co/Qwen/Qwen-Image-Edit), [Krea 2](https://huggingface.co/Comfy-Org/Krea-2) | Wan 2.1 VAE (`wan_2.1_vae`, `qwen_image_vae`) | [TensorForger/Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1) | images and videos: 2x resolution, 2x frame rate |
+| [FLUX.2 [dev]](https://huggingface.co/black-forest-labs/FLUX.2-dev), [FLUX.2 [klein] 4B](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B) / [9B](https://huggingface.co/black-forest-labs/FLUX.2-klein-9B), [MOSS-Image](https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT) | FLUX.2 VAE (`flux2-vae`, `flux2-vae_small`) | [TensorForger/Steppe-Flux.2](https://huggingface.co/TensorForger/Steppe-Flux.2) | images: 2x resolution |
 
-[![Texture, not blur](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_cloth.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_cloth.png)
-
-[![Any aspect ratio](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_leaves.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/compare_leaves.png)
-
-All examples: Krea 2 Turbo, Steppe 200M 1-step, chained 2x → 2x, no prompt and no refinement pass. Bicubic tiles are
-upscaled by the same factor from the same input. Click an image for the full resolution card.
+The model cards have the galleries, benchmarks and training details of each family. The nodes download the models on
+first use.
 
 ## Installation
 
@@ -56,8 +50,6 @@ yourself from Hugging Face ([Wan 2.1](https://huggingface.co/TensorForger/Steppe
 [FLUX.2](https://huggingface.co/TensorForger/Steppe-Flux.2)) into that folder.
 
 ## Models
-
-[![Three models, one node](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/models_lineup.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/models_lineup.png)
 
 Pick the models of the VAE your workflow uses: `steppe_wan_2_1_*` for the Wan 2.1 VAE, `steppe_flux_2_*` for the
 FLUX.2 VAE. A model of the wrong VAE stops with an error that names the right one.
@@ -84,8 +76,6 @@ The FLUX.2 models upscale images only (no `temporal`).
 
 Basic graph: `KSampler → Steppe Upscale Latent → VAE Decode`. Images and videos use the same node.
 
-[![The 4x example workflow](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/workflow.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/workflow.png)
-
 ## Example workflows
 
 In `example_workflows/` (also listed in ComfyUI's template browser under custom nodes):
@@ -93,12 +83,14 @@ In `example_workflows/` (also listed in ComfyUI's template browser under custom 
 - `krea_2_steppe_image_upscale_4x.json`: Krea 2 Turbo at 960x1280, two chained Steppe nodes, 3840x5120 output.
 - `wan_2.1_steppe_video_upscale_spatiotemporal.json`: Wan 2.1 T2V 1.3B at 640x512, 65 frames at 16 fps, Steppe 2x
   resolution and 2x frame rate: 1280x1024, 129 frames at 32 fps.
+- `flux_2_klein_steppe_image_upscale_4x.json`: FLUX.2 [klein] 4B at 896x512, two chained Steppe nodes, 3584x2048
+  output.
+- `moss_image_steppe_image_upscale_4x.json`: MOSS-Image at 960x1280, two chained Steppe nodes, 3840x5120 output.
 
-The model links and folders are in the note inside each workflow.
+The model links and folders are in the note inside each workflow. The image workflows compare the results with the
+Image Comparer of [rgthree-comfy](https://github.com/rgthree/rgthree-comfy).
 
 ### Parameters
-
-[![hff: dial in the detail](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hff_portrait.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/hff_portrait.png)
 
 - **hff** (high frequency feature, `0...1`, default 0.9) is the target amount of fine detail and sharpness. `-1`
   turns hff off and lets the model choose. The values are absolute: Steppe Measure HFF on a photo at the target
@@ -130,36 +122,26 @@ The model links and folders are in the note inside each workflow.
 
 ## How it works
 
-[![A generative upscaler in latent space](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/how_it_works.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/how_it_works.png)
-
 Latent upscalers made for hires fix only stretch the latent, so the base model has to denoise it again at the high
 resolution. Steppe is a generative model itself: a window transformer on the full resolution latent grid generates
-the missing detail with rectified flow, distilled to one step. Details on the
-[model card](https://huggingface.co/TensorForger/Steppe-Wan2.1#how-it-works).
+the missing detail with rectified flow, distilled to one step. Details on the model cards:
+[Wan 2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1#how-it-works),
+[FLUX.2](https://huggingface.co/TensorForger/Steppe-Flux.2#how-it-works).
 
 ## Benchmark
 
-[![Benchmark: latency vs patch FID](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/benchmark_plot.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/benchmark_plot.png)
+1000 photos (Axis-V1), 512 → 1024 from the latent only (no prompt). Patch FID on native 256 px tiles (lower is
+better); latency at batch 1 on an RTX 5090, VAE decode included.
 
-1000 photos (Axis-V1), 512 → 1024 from the Wan 2.1 latent only (no prompt), patch FID on native 256 px tiles (lower
-is better). Latency at batch 1 on an RTX 5090, VAE decode included.
+| VAE | Steppe 200M 1-step | Steppe 20M 1-step | best other 2x solution | bicubic after decode |
+|---|---|---|---|---|
+| Wan 2.1 | **4.36**, 179 ms | 5.85, 141 ms | 6.33, 29 ms (Wan2.1-VAE-upscale2x decoder) | 14.13, 30 ms |
+| FLUX.2 | **1.75**, 172 ms | 2.20, 131 ms | 4.28, 128 ms (FlowUpscaler, our previous model) | 8.12, 25 ms |
 
-| solution | patch FID | latency |
-|---|---|---|
-| Steppe 200M base, 20 steps | **4.31** | 1051 ms |
-| Steppe 200M 1-step | 4.36 | 179 ms |
-| Steppe 20M 1-step | 5.85 | 141 ms |
-| Wan2.1-VAE-upscale2x decoder (spacepxl) | 6.33 | 29 ms |
-| SPAN 2x after decode | 11.19 | 35 ms |
-| Real-ESRGAN x2 after decode | 13.83 | 57 ms |
-| bicubic after decode | 14.13 | 30 ms |
-| latent upscalers made for hires fix (SesquiLSR, NN latent) | 29-51 | ~135 ms |
-
-[![Benchmark crops against the ground truth](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/benchmark_gallery.jpg)](https://raw.githubusercontent.com/tensorforger/tensorforger/main/assets/steppe/benchmark_gallery.png)
-
-Benchmark images: [Axis-V1](https://huggingface.co/datasets/refine-axis/axis-v1_1k) by refine-axis (CC BY 4.0),
-cropped. Full table with FID, color shift and VRAM:
-[model card](https://huggingface.co/TensorForger/Steppe-Wan2.1#benchmark).
+Full tables with FID, color shift, VRAM and plots:
+[Steppe-Wan2.1](https://huggingface.co/TensorForger/Steppe-Wan2.1#benchmark),
+[Steppe-Flux.2](https://huggingface.co/TensorForger/Steppe-Flux.2#benchmark). Benchmark images:
+[Axis-V1](https://huggingface.co/datasets/refine-axis/axis-v1_1k) by refine-axis (CC BY 4.0).
 
 ## Python
 

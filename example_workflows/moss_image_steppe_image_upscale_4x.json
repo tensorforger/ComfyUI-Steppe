@@ -1,0 +1,1104 @@
+{
+  "id": "77c2de66-f6a6-4585-848b-bdcaed751295",
+  "revision": 0,
+  "last_node_id": 24,
+  "last_link_id": 31,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "VAEDecode",
+      "pos": [
+        2941.0267245436985,
+        2033.8640189663906
+      ],
+      "size": [
+        341.3735276947832,
+        59.02316062323939
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 30
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 3,
+      "type": "VAEDecode",
+      "pos": [
+        2942.946845205867,
+        2145.3159692371423
+      ],
+      "size": [
+        336.25559764213085,
+        62.117744378594125
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 31
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            29
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 4,
+      "type": "KSampler",
+      "pos": [
+        1934.408428308138,
+        1903.0272622127825
+      ],
+      "size": [
+        290,
+        290
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 6
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 7
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 8
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            13,
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        391088111397793,
+        "fixed",
+        25,
+        2.5,
+        "er_sde",
+        "simple",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 391088111397793,
+        "control_after_generate": "fixed",
+        "steps": 25,
+        "cfg": 2.5,
+        "sampler_name": "er_sde",
+        "scheduler": "simple",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 7,
+      "type": "SteppeUpscaleLatent",
+      "pos": [
+        2292.563415969172,
+        2035.8952299738824
+      ],
+      "size": [
+        277.72965257530905,
+        222
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "link": 12
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeUpscaleLatent"
+      },
+      "widgets_values": [
+        true,
+        false,
+        0.9,
+        1,
+        0,
+        410935954874283,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "spatial": true,
+        "temporal": false,
+        "hff": 0.9,
+        "guidance": 1,
+        "steps": 0,
+        "seed": 410935954874283,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 8,
+      "type": "SteppeLoadUpscaler",
+      "pos": [
+        2285.0392119385197,
+        1900.6407011491592
+      ],
+      "size": [
+        587.3328714309921,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "links": [
+            12,
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeLoadUpscaler"
+      },
+      "widgets_values": [
+        "steppe_flux_2_200M_1step.safetensors",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "model_name": "steppe_flux_2_200M_1step.safetensors",
+        "dtype": "auto"
+      }
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        1404.5442326845302,
+        1898.0290090609717
+      ],
+      "size": [
+        458.98168324058497,
+        574.5151053065952
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            7
+          ]
+        }
+      ],
+      "title": "Positive Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A close-up professional macro photograph at golden hour: a bold, lush orange-furred cat positioned on the left, gazing downward at a frog, with bright, natural light illuminating the scene, sharp detailed fur textures, and clear reflections of the frog in the cat’s eyes; the outdoor background is softly blurred, showing a sunny swamp with stones covered in lush green moss and surrounding wetland vegetation. The large caption reading “Explore” is partially behind the cat, on the background, across the top of the image in a stylish Times New Roman–style typeface in warm white, styled like a journal cover and layered so it appears behind the cat—partially occluded by the cat’s head and body—with the smaller line “all scales, all VAEs” placed below it and shifted to the right."
+      ],
+      "widgets_values_named": {
+        "text": "A close-up professional macro photograph at golden hour: a bold, lush orange-furred cat positioned on the left, gazing downward at a frog, with bright, natural light illuminating the scene, sharp detailed fur textures, and clear reflections of the frog in the cat’s eyes; the outdoor background is softly blurred, showing a sunny swamp with stones covered in lush green moss and surrounding wetland vegetation. The large caption reading “Explore” is partially behind the cat, on the background, across the top of the image in a stylish Times New Roman–style typeface in warm white, styled like a journal cover and layered so it appears behind the cat—partially occluded by the cat’s head and body—with the smaller line “all scales, all VAEs” placed below it and shifted to the right."
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 11,
+      "type": "CLIPTextEncode",
+      "pos": [
+        1407.820394012998,
+        2520.822442340958
+      ],
+      "size": [
+        456.827381405657,
+        91.16667935839632
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "Negative Prompt (empty = reference default)",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "text": ""
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 14,
+      "type": "UNETLoader",
+      "pos": [
+        947.712517989025,
+        1899.5658039494913
+      ],
+      "size": [
+        350,
+        90
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            18,
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "moss_image_sft_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_int8_convrot.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "moss_image_sft_int8_convrot.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "moss_image_sft_int8_convrot.safetensors",
+        "weight_dtype": "default"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 15,
+      "type": "CLIPLoader",
+      "pos": [
+        947.712517989025,
+        2509.565803949491
+      ],
+      "size": [
+        350,
+        140
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "showAdvanced": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            15,
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3.5_9b_w4a8_gptq.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_w4a8_gptq.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3.5_9b_w4a8_gptq.safetensors",
+        "moss_image",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3.5_9b_w4a8_gptq.safetensors",
+        "type": "moss_image",
+        "device": "default"
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 16,
+      "type": "VAELoader",
+      "pos": [
+        2942.4282478823934,
+        1906.212866701599
+      ],
+      "size": [
+        350,
+        60
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            3,
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "flux2-vae_small.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae_small.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "flux2-vae_small.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "flux2-vae_small.safetensors"
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 17,
+      "type": "SkipLayerGuidanceDiTSimple",
+      "pos": [
+        947.712517989025,
+        2209.565803949491
+      ],
+      "size": [
+        350,
+        220
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "showAdvanced": true,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            20
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SkipLayerGuidanceDiTSimple"
+      },
+      "widgets_values": [
+        "",
+        "22",
+        0,
+        0.5
+      ],
+      "widgets_values_named": {
+        "double_layers": "",
+        "single_layers": "22",
+        "start_percent": 0,
+        "end_percent": 0.5
+      }
+    },
+    {
+      "id": 18,
+      "type": "ComfySwitchNode",
+      "pos": [
+        947.712517989025,
+        2069.565803949491
+      ],
+      "size": [
+        350,
+        101.9617941402193
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "on_false",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 19
+        },
+        {
+          "name": "on_true",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "MODEL",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+        false
+      ],
+      "widgets_values_named": {
+        "switch": false
+      }
+    },
+    {
+      "id": 19,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        1413.3212205581076,
+        2669.9575914624097
+      ],
+      "size": [
+        449.9783335507591,
+        117.11580127786965
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        960,
+        1280,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 960,
+        "height": 1280,
+        "batch_size": 1
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 20,
+      "type": "SteppeUpscaleLatent",
+      "pos": [
+        2591.501371593398,
+        2033.296602161598
+      ],
+      "size": [
+        281.04648110575863,
+        222
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "link": 24
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            30
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeUpscaleLatent"
+      },
+      "widgets_values": [
+        true,
+        false,
+        0.9,
+        1,
+        0,
+        627248821401927,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "spatial": true,
+        "temporal": false,
+        "hff": 0.9,
+        "guidance": 1,
+        "steps": 0,
+        "seed": 627248821401927,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 21,
+      "type": "Image Comparer (rgthree)",
+      "pos": [
+        3713.61127957825,
+        1906.3292396247698
+      ],
+      "size": [
+        447.78671991396857,
+        582.9237263672619
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 26
+        },
+        {
+          "dir": 3,
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "dir": 4,
+          "name": "images",
+          "shape": 3,
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "comparer_mode": "Slide"
+      },
+      "widgets_values": [
+        [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_mhfzd_00073_.png&type=temp&subfolder=&rand=0.6371504059736697"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_mhfzd_00074_.png&type=temp&subfolder=&rand=0.7535944898325234"
+          }
+        ]
+      ],
+      "widgets_values_named": {
+        "rgthree_comparer": {
+          "images": [
+            {
+              "name": "A",
+              "selected": true,
+              "url": "/api/view?filename=rgthree.compare._temp_mhfzd_00073_.png&type=temp&subfolder=&rand=0.6371504059736697",
+              "img": {}
+            },
+            {
+              "name": "B",
+              "selected": true,
+              "url": "/api/view?filename=rgthree.compare._temp_mhfzd_00074_.png&type=temp&subfolder=&rand=0.7535944898325234",
+              "img": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": "SaveImage",
+      "pos": [
+        3344.203895554534,
+        2219.295071816723
+      ],
+      "size": [
+        324.17352971694163,
+        270.00000000000006
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "steppe_flux_demo_low_res"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "steppe_flux_demo_low_res"
+      }
+    },
+    {
+      "id": 23,
+      "type": "SaveImage",
+      "pos": [
+        3334.6658213509527,
+        1897.6725814766864
+      ],
+      "size": [
+        324.17352971694163,
+        270
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            26
+          ]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "steppe_flux_demo_high_res"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "steppe_flux_demo_high_res"
+      }
+    },
+    {
+      "id": 24,
+      "type": "MarkdownNote",
+      "pos": [
+        295.2787327638772,
+        1852.1266869311057
+      ],
+      "size": [
+        520,
+        1174
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## Model Links\n\n- [Hugging Face: Comfy-Org/MOSS-Image](https://huggingface.co/Comfy-Org/MOSS-Image)\n- [ModelScope: Comfy-Org/MOSS-Image](https://modelscope.cn/models/Comfy-Org/MOSS-Image)\n\n**diffusion_models**\n\n- [moss_image_sft_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_int8_convrot.safetensors)\n- [moss_image_sft_bf16.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_bf16.safetensors)\n\n`moss_image_base_*` checkpoints run in the same graph.\n\n**text_encoders**\n\n- [qwen3.5_9b_w4a8_gptq.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_w4a8_gptq.safetensors)\n\n**latent upscaler** (downloaded automatically on first use)\n\n- [steppe_flux_2_200M_1step.safetensors](https://huggingface.co/TensorForger/Steppe-Flux.2/resolve/main/steppe_flux_2_200M_1step.safetensors)\n\n**vae**\n\n- [flux2-vae_small.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae_small.safetensors)\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 diffusion_models/\n│   │   └── moss_image_sft_int8_convrot.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen3.5_9b_w4a8_gptq.safetensors\n│   ├── 📂 latent_upscale_models/\n│   │   └── steppe_flux_2_200M_1step.safetensors\n│   └── 📂 vae/\n│       └── flux2-vae_small.safetensors\n```\n\n## Steppe\n\n- Each **Steppe Upscale Latent** node doubles the resolution of the latent: 960x1280 → 1920x2560 → 3840x5120. No second sampling pass, no prompt.\n- MOSS-Image uses the FLUX.2 VAE latent space, so the `steppe_flux_2_*` models work directly; the small FLUX.2 decoder decodes the upscaled latent.\n- `hff` (0...1, default 0.9) sets the amount of fine detail; `-1` lets the model choose.\n- For large outputs use `VAE Decode (Tiled)` if the decode runs out of memory.\n\n## Skip layer guidance\n\nOptional, off by default: set the switch in **Settings** to `true` to sample through `SkipLayerGuidanceDiTSimple`.\n\n## Custom Nodes\n\n- [ComfyUI-Steppe](https://github.com/TensorForger/ComfyUI-Steppe)\n- [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) (Image Comparer only, optional)\n"
+      ],
+      "widgets_values_named": {
+        "text": "Guide: [Subgraph](https://docs.comfy.org/interface/features/subgraph)\n\n## Model Links\n\n- [Hugging Face:Comfy-Org/MOSS-Image](https://huggingface.co/Comfy-Org/MOSS-Image)\n- [ModelScope:Comfy-Org/MOSS-Image](https://modelscope.cn/models/Comfy-Org/MOSS-Image)\n\n**diffusion_models**\n\n- [moss_image_sft_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_int8_convrot.safetensors)\n- [moss_image_sft_bf16.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_bf16.safetensors)\n\n**text_encoders**\n\n- [qwen3.5_9b_w4a8_gptq.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_w4a8_gptq.safetensors)\n\n**Checkpoint variants**: `moss_image_sft_*` is the instruction-tuned checkpoint used here; `moss_image_base_*` runs in the same graph.\n\n**vae**\n\n- [flux2-vae_small.safetensors](https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae_small.safetensors)\n\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 diffusion_models/\n│   │   ├── moss_image_sft_int8_convrot.safetensors\n│   │   └── moss_image_sft_bf16.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen3.5_9b_w4a8_gptq.safetensors\n│   └── 📂 vae/\n│       └── flux2-vae_small.safetensors\n```\n\n## Prompt upsampler\n\nThe `enable_prompt_upsampler` switch on the **Text to Image (MOSS-Image)** node is **true**, so a short prompt is rewritten into one full\nscene caption before it reaches the model. The upsampler runs on MOSS-Image's own text encoder\n(`qwen3.5_9b_w4a8_gptq.safetensors`, loaded with `type = moss_image`), the same file the model already needs — no second\ntext encoder to download. Set the switch to `false` to send the raw prompt; either way the caption actually used is shown in the\n`PreviewAny` node inside the subgraph.\n\n\n## Prompt skill\n\nThe system prompt driving the upsampler is written from the official [MOSS-Image Prompt Enhancer skill](https://github.com/OpenMOSS/MOSS-Image/blob/main/skills/moss-image-prompt-enhancer/SKILL.md). The same skill turns an idea into a caption or a Layout prompt outside ComfyUI, and it is the reference for the caption style this model was trained on.\n\n## Report Issue\n\nNote: Please update ComfyUI first ([guide](https://docs.comfy.org/installation/update_comfyui)) and prepare required models. Desktop/Cloud updates follow stable releases, so some nightly-supported models may not be available yet.\n\n- Cannot run / runtime errors: [ComfyUI/issues](https://github.com/comfyanonymous/ComfyUI/issues)\n- UI / frontend issues: [ComfyUI_frontend/issues](https://github.com/Comfy-Org/ComfyUI_frontend/issues)\n- Workflow issues: [workflow_templates/issues](https://github.com/Comfy-Org/workflow_templates/issues)\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    }
+  ],
+  "links": [
+    [
+      3,
+      16,
+      0,
+      2,
+      1,
+      "VAE"
+    ],
+    [
+      5,
+      16,
+      0,
+      3,
+      1,
+      "VAE"
+    ],
+    [
+      6,
+      18,
+      0,
+      4,
+      0,
+      "MODEL"
+    ],
+    [
+      7,
+      10,
+      0,
+      4,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      8,
+      11,
+      0,
+      4,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      9,
+      19,
+      0,
+      4,
+      3,
+      "LATENT"
+    ],
+    [
+      12,
+      8,
+      0,
+      7,
+      0,
+      "STEPPE_UPSCALER"
+    ],
+    [
+      13,
+      4,
+      0,
+      7,
+      1,
+      "LATENT"
+    ],
+    [
+      15,
+      15,
+      0,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      17,
+      15,
+      0,
+      11,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      14,
+      0,
+      17,
+      0,
+      "MODEL"
+    ],
+    [
+      19,
+      14,
+      0,
+      18,
+      0,
+      "MODEL"
+    ],
+    [
+      20,
+      17,
+      0,
+      18,
+      1,
+      "MODEL"
+    ],
+    [
+      23,
+      7,
+      0,
+      20,
+      1,
+      "LATENT"
+    ],
+    [
+      24,
+      8,
+      0,
+      20,
+      0,
+      "STEPPE_UPSCALER"
+    ],
+    [
+      26,
+      23,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      27,
+      22,
+      0,
+      21,
+      1,
+      "IMAGE"
+    ],
+    [
+      28,
+      2,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      29,
+      3,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      30,
+      20,
+      0,
+      2,
+      0,
+      "LATENT"
+    ],
+    [
+      31,
+      4,
+      0,
+      3,
+      0,
+      "LATENT"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Settings",
+      "bounding": [
+        1377.712517989025,
+        1819.5658039494913,
+        510.7792306688805,
+        994.2782761744709
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Models",
+      "bounding": [
+        887.712517989025,
+        1819.5658039494913,
+        460,
+        990
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "Generate",
+      "bounding": [
+        1914.608326453544,
+        1822.1927005377242,
+        332.9688120793753,
+        407.2597618282696
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "Upscaling",
+      "bounding": [
+        2268.401271452245,
+        1822.921209740766,
+        631.3044152891202,
+        450.89754428415995
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "Decode",
+      "bounding": [
+        2918.221006067134,
+        1823.9646243174957,
+        385.636234134603,
+        429.51514375782403
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "Preview and Save",
+      "bounding": [
+        3323.429126088693,
+        1825.676431803004,
+        856.5444375624056,
+        679.8095804130401
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.39142513012204144,
+      "offset": [
+        64.26235572954451,
+        -1138.333988383594
+      ]
+    },
+    "frontendVersion": "1.59.11"
+  },
+  "version": 0.4
+}

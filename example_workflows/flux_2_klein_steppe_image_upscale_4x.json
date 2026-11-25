@@ -1,0 +1,1423 @@
+{
+  "id": "92112d97-bb64-4b44-86f2-ea5691ef8f6e",
+  "revision": 0,
+  "last_node_id": 138,
+  "last_link_id": 248,
+  "nodes": [
+    {
+      "id": 94,
+      "type": "KSamplerSelect",
+      "pos": [
+        1196.730272602635,
+        746.5005276840732
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            172
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerSelect",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "euler"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "euler"
+      }
+    },
+    {
+      "id": 100,
+      "type": "CLIPTextEncode",
+      "pos": [
+        700.730272602635,
+        836.5005276840731
+      ],
+      "size": [
+        430,
+        100
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 179
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            169
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Negative Prompt)",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "text": ""
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 103,
+      "type": "RandomNoise",
+      "pos": [
+        1196.730272602635,
+        486.5005276840731
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            170
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        32082125136798,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 32082125136798,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 104,
+      "type": "CLIPLoader",
+      "pos": [
+        270.73027260263495,
+        656.3338781159564
+      ],
+      "size": [
+        364.42708333333337,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            179,
+            180
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "models": [
+          {
+            "name": "qwen_3_4b.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors",
+            "directory": "text_encoders"
+          }
+        ],
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "qwen_3_4b.safetensors",
+        "flux2",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen_3_4b.safetensors",
+        "type": "flux2",
+        "device": "default"
+      }
+    },
+    {
+      "id": 97,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1496.730272602635,
+        526.5005276840732
+      ],
+      "size": [
+        212.38333740234376,
+        106
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 170
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 171
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 172
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 173
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 174
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            189,
+            239
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      }
+    },
+    {
+      "id": 99,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        1213.9554270225237,
+        1028.3795537262674
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 177
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 178
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            174
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 102,
+      "type": "PrimitiveInt",
+      "pos": [
+        320.73027260263495,
+        1236.500527684073
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            166,
+            178
+          ]
+        }
+      ],
+      "title": "Height",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        512,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "value": 512,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 105,
+      "type": "UNETLoader",
+      "pos": [
+        270.73027260263495,
+        506.33387811595634
+      ],
+      "size": [
+        364.42708333333337,
+        82
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            167
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "models": [
+          {
+            "name": "flux-2-klein-base-4b.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-base-4b.safetensors",
+            "directory": "diffusion_models"
+          }
+        ],
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "flux-2-klein-4b-fp8.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "flux-2-klein-4b-fp8.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 96,
+      "type": "CFGGuider",
+      "pos": [
+        1196.730272602635,
+        606.5005276840732
+      ],
+      "size": [
+        270,
+        98
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 167
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 168
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 169
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            171
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CFGGuider",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        1
+      ],
+      "widgets_values_named": {
+        "cfg": 1
+      }
+    },
+    {
+      "id": 95,
+      "type": "Flux2Scheduler",
+      "pos": [
+        1196.730272602635,
+        846.5005276840731
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 165
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 166
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            173
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Flux2Scheduler",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        4,
+        1024,
+        1024
+      ],
+      "widgets_values_named": {
+        "steps": 4,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": 106,
+      "type": "VAELoader",
+      "pos": [
+        2392.2646858177386,
+        500.12716161140713
+      ],
+      "size": [
+        296.3744144846763,
+        58
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            190,
+            243
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "models": [
+          {
+            "name": "flux2-vae.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors",
+            "directory": "vae"
+          }
+        ],
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "flux2-vae.safetensors"
+      }
+    },
+    {
+      "id": 107,
+      "type": "CLIPTextEncode",
+      "pos": [
+        700.730272602635,
+        506.5005276840731
+      ],
+      "size": [
+        430,
+        280
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 180
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            168
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Positive Prompt)",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "A close up macro photo of a cat with very lush orange fur. Some green houseplants on the blurry background. Fur textures, natural, realism, golden hour, sharp details, HDR, 4K, bokeh."
+      ],
+      "widgets_values_named": {
+        "text": "A close up macro photo of a cat with very lush orange fur. Some green houseplants on the blurry background. Fur textures, natural, realism, golden hour, sharp details, HDR, 4K, bokeh."
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 129,
+      "type": "MarkdownNote",
+      "pos": [
+        1774.2726969838268,
+        1017.7846988353625
+      ],
+      "size": [
+        493.82589659667065,
+        634.3277316727231
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## Model Links\n\nMore FLUX.2 [klein] variants (9B, base, BF16): [ComfyUI FLUX.2 [klein] tutorial](https://docs.comfy.org/tutorials/flux/flux-2-klein)\n\n**diffusion_models**\n\n- [flux-2-klein-4b-fp8.safetensors](https://huggingface.co/black-forest-labs/FLUX.2-klein-4b-fp8/resolve/main/flux-2-klein-4b-fp8.safetensors)\n\n**text_encoders**\n\n- [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/flux2-klein-4B/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n\n**latent upscaler** (downloaded automatically on first use)\n\n- [steppe_flux_2_200M_1step.safetensors](https://huggingface.co/TensorForger/Steppe-Flux.2/resolve/main/steppe_flux_2_200M_1step.safetensors)\n\n**vae**\n\n- [flux2-vae.safetensors](https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors)\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 diffusion_models/\n│   │   └── flux-2-klein-4b-fp8.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen_3_4b.safetensors\n│   ├── 📂 latent_upscale_models/\n│   │   └── steppe_flux_2_200M_1step.safetensors\n│   └── 📂 vae/\n│       └── flux2-vae.safetensors\n```\n\n## Steppe\n\n- Each **Steppe Upscale Latent** node doubles the resolution of the FLUX.2 latent: 896x512 → 1792x1024 → 3584x2048. No second sampling pass, no prompt.\n- Works with every FLUX.2 VAE model: FLUX.2 [dev], FLUX.2 [klein] and MOSS-Image.\n- `hff` (0...1, default 0.9) sets the amount of fine detail; `-1` lets the model choose.\n- For large outputs use `VAE Decode (Tiled)` if the decode runs out of memory.\n\n## Custom Nodes\n\n- [ComfyUI-Steppe](https://github.com/TensorForger/ComfyUI-Steppe)\n- [rgthree-comfy](https://github.com/rgthree/rgthree-comfy): Image Comparer, the output node of this workflow (or replace it with two `Save Image` nodes)\n"
+      ],
+      "widgets_values_named": {
+        "text": "## Model Links\n\nMore FLUX.2 [klein] variants (9B, base, BF16): [ComfyUI FLUX.2 [klein] tutorial](https://docs.comfy.org/tutorials/flux/flux-2-klein)\n\n**diffusion_models**\n\n- [flux-2-klein-4b-fp8.safetensors](https://huggingface.co/black-forest-labs/FLUX.2-klein-4b-fp8/resolve/main/flux-2-klein-4b-fp8.safetensors)\n\n**text_encoders**\n\n- [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/flux2-klein-4B/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n\n**latent upscaler** (downloaded automatically on first use)\n\n- [steppe_flux_2_200M_1step.safetensors](https://huggingface.co/TensorForger/Steppe-Flux.2/resolve/main/steppe_flux_2_200M_1step.safetensors)\n\n**vae**\n\n- [flux2-vae.safetensors](https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors)\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 diffusion_models/\n│   │   └── flux-2-klein-4b-fp8.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen_3_4b.safetensors\n│   ├── 📂 latent_upscale_models/\n│   │   └── steppe_flux_2_200M_1step.safetensors\n│   └── 📂 vae/\n│       └── flux2-vae.safetensors\n```\n\n## Steppe\n\n- Each **Steppe Upscale Latent** node doubles the resolution of the FLUX.2 latent: 896x512 → 1792x1024 → 3584x2048. No second sampling pass, no prompt.\n- Works with every FLUX.2 VAE model: FLUX.2 [dev], FLUX.2 [klein] and MOSS-Image.\n- `hff` (0...1, default 0.9) sets the amount of fine detail; `-1` lets the model choose.\n- For large outputs use `VAE Decode (Tiled)` if the decode runs out of memory.\n\n## Custom Nodes\n\n- [ComfyUI-Steppe](https://github.com/TensorForger/ComfyUI-Steppe)\n- [rgthree-comfy](https://github.com/rgthree/rgthree-comfy): Image Comparer, the output node of this workflow (or replace it with two `Save Image` nodes)\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 101,
+      "type": "PrimitiveInt",
+      "pos": [
+        320.73027260263495,
+        1086.500527684073
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            165,
+            177
+          ]
+        }
+      ],
+      "title": "Width",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt",
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        896,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "value": 896,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 114,
+      "type": "VAEDecode",
+      "pos": [
+        2398.3786631011853,
+        705.0729463487368
+      ],
+      "size": [
+        291.88395517546496,
+        46
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 189
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 190
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            247
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 132,
+      "type": "SteppeLoadUpscaler",
+      "pos": [
+        1775.3558409885031,
+        497.18807866478073
+      ],
+      "size": [
+        548.6012843919125,
+        82
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "links": [
+            238,
+            241
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeLoadUpscaler"
+      },
+      "widgets_values": [
+        "steppe_flux_2_200M_1step.safetensors",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "model_name": "steppe_flux_2_200M_1step.safetensors",
+        "dtype": "auto"
+      }
+    },
+    {
+      "id": 133,
+      "type": "SteppeUpscaleLatent",
+      "pos": [
+        1782.8625783537861,
+        662.3371280785415
+      ],
+      "size": [
+        250.9642884339421,
+        222
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "link": 238
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 239
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            240
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeUpscaleLatent"
+      },
+      "widgets_values": [
+        true,
+        false,
+        0.9,
+        1,
+        0,
+        0,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "spatial": true,
+        "temporal": false,
+        "hff": 0.9,
+        "guidance": 1,
+        "steps": 0,
+        "seed": 0,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 134,
+      "type": "VAEDecode",
+      "pos": [
+        2396.3669610859356,
+        605.7187254935767
+      ],
+      "size": [
+        289.71701398678715,
+        46
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 242
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 243
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            248
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 135,
+      "type": "SteppeUpscaleLatent",
+      "pos": [
+        2050.1601886637673,
+        657.4484104570676
+      ],
+      "size": [
+        270,
+        222
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscaler",
+          "type": "STEPPE_UPSCALER",
+          "link": 241
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 240
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            242
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SteppeUpscaleLatent"
+      },
+      "widgets_values": [
+        true,
+        false,
+        0.9,
+        1,
+        0,
+        0,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "spatial": true,
+        "temporal": false,
+        "hff": 0.9,
+        "guidance": 1,
+        "steps": 0,
+        "seed": 0,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 136,
+      "type": "Image Comparer (rgthree)",
+      "pos": [
+        3128.5586624167818,
+        505.95357687581463
+      ],
+      "size": [
+        447.78671991396857,
+        582.9237263672619
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 245
+        },
+        {
+          "dir": 3,
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 246
+        }
+      ],
+      "outputs": [
+        {
+          "dir": 4,
+          "name": "images",
+          "shape": 3,
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "comparer_mode": "Slide"
+      },
+      "widgets_values": [
+        [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_rsajd_00003_.png&type=temp&subfolder=&rand=0.6860182614624364"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_rsajd_00004_.png&type=temp&subfolder=&rand=0.02080301870975676"
+          }
+        ]
+      ],
+      "widgets_values_named": {
+        "rgthree_comparer": {
+          "images": [
+            {
+              "name": "A",
+              "selected": true,
+              "url": "/api/view?filename=rgthree.compare._temp_rsajd_00003_.png&type=temp&subfolder=&rand=0.6860182614624364",
+              "img": {}
+            },
+            {
+              "name": "B",
+              "selected": true,
+              "url": "/api/view?filename=rgthree.compare._temp_rsajd_00004_.png&type=temp&subfolder=&rand=0.02080301870975676",
+              "img": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 137,
+      "type": "SaveImage",
+      "pos": [
+        2759.1512783930657,
+        818.9194090677677
+      ],
+      "size": [
+        324.17352971694163,
+        270.00000000000006
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 247
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            246
+          ]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "steppe_flux_demo_low_res"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "steppe_flux_demo_low_res"
+      }
+    },
+    {
+      "id": 138,
+      "type": "SaveImage",
+      "pos": [
+        2749.6132041894843,
+        497.2969187277313
+      ],
+      "size": [
+        324.17352971694163,
+        270
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 248
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            245
+          ]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "steppe_flux_demo_high_res"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "steppe_flux_demo_high_res"
+      }
+    }
+  ],
+  "links": [
+    [
+      167,
+      105,
+      0,
+      96,
+      0,
+      "MODEL"
+    ],
+    [
+      168,
+      107,
+      0,
+      96,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      169,
+      100,
+      0,
+      96,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      170,
+      103,
+      0,
+      97,
+      0,
+      "NOISE"
+    ],
+    [
+      171,
+      96,
+      0,
+      97,
+      1,
+      "GUIDER"
+    ],
+    [
+      172,
+      94,
+      0,
+      97,
+      2,
+      "SAMPLER"
+    ],
+    [
+      173,
+      95,
+      0,
+      97,
+      3,
+      "SIGMAS"
+    ],
+    [
+      174,
+      99,
+      0,
+      97,
+      4,
+      "LATENT"
+    ],
+    [
+      177,
+      101,
+      0,
+      99,
+      0,
+      "INT"
+    ],
+    [
+      178,
+      102,
+      0,
+      99,
+      1,
+      "INT"
+    ],
+    [
+      179,
+      104,
+      0,
+      100,
+      0,
+      "CLIP"
+    ],
+    [
+      180,
+      104,
+      0,
+      107,
+      0,
+      "CLIP"
+    ],
+    [
+      189,
+      97,
+      0,
+      114,
+      0,
+      "LATENT"
+    ],
+    [
+      190,
+      106,
+      0,
+      114,
+      1,
+      "VAE"
+    ],
+    [
+      238,
+      132,
+      0,
+      133,
+      0,
+      "STEPPE_UPSCALER"
+    ],
+    [
+      239,
+      97,
+      0,
+      133,
+      1,
+      "LATENT"
+    ],
+    [
+      240,
+      133,
+      0,
+      135,
+      1,
+      "LATENT"
+    ],
+    [
+      241,
+      132,
+      0,
+      135,
+      0,
+      "STEPPE_UPSCALER"
+    ],
+    [
+      242,
+      135,
+      0,
+      134,
+      0,
+      "LATENT"
+    ],
+    [
+      243,
+      106,
+      0,
+      134,
+      1,
+      "VAE"
+    ],
+    [
+      165,
+      101,
+      0,
+      95,
+      0,
+      "INT"
+    ],
+    [
+      166,
+      102,
+      0,
+      95,
+      1,
+      "INT"
+    ],
+    [
+      245,
+      138,
+      0,
+      136,
+      0,
+      "IMAGE"
+    ],
+    [
+      246,
+      137,
+      0,
+      136,
+      1,
+      "IMAGE"
+    ],
+    [
+      247,
+      114,
+      0,
+      137,
+      0,
+      "IMAGE"
+    ],
+    [
+      248,
+      134,
+      0,
+      138,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 5,
+      "title": "Models",
+      "bounding": [
+        265.39695233463226,
+        417.66719407991707,
+        380,
+        550
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "Prompt",
+      "bounding": [
+        685.3969523346323,
+        417.66719407991707,
+        470,
+        550
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "Sampler",
+      "bounding": [
+        1195.3969523346323,
+        417.66719407991707,
+        534.4752448620354,
+        742.1353683827083
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "Image Size",
+      "bounding": [
+        265.39695233463226,
+        997.6671940799171,
+        380,
+        350
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "Upscaling",
+      "bounding": [
+        1757.0419263613005,
+        420.89349136219016,
+        597.0456287796676,
+        501.0332345350067
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 11,
+      "title": "Decode",
+      "bounding": [
+        2370.3692665622734,
+        421.1451438933416,
+        343.12128251452305,
+        365.53488956875935
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 12,
+      "title": "Preview and Save",
+      "bounding": [
+        2738.3765089272247,
+        425.30076905404894,
+        856.5444375624056,
+        679.8095804130401
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.4736244074476754,
+      "offset": [
+        -169.7603061782523,
+        341.1154702314143
+      ]
+    },
+    "frontendVersion": "1.59.11",
+    "workflowRendererVersion": "LG"
+  },
+  "version": 0.4
+}
